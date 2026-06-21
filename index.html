@@ -239,7 +239,25 @@
   .cap-row .nm{width:130px;flex:none;font-weight:600}
   .cap-row .track{flex:1;background:#eef2f7;border-radius:8px;height:12px;overflow:hidden}
   .cap-row .fill{height:100%;background:linear-gradient(90deg,var(--good),var(--aqua))}
-  .cap-row .pct{width:80px;text-align:right;font-size:12px;color:var(--muted);font-weight:600}
+  .cap-row .pct{width:90px;text-align:right;font-size:12px;color:var(--muted);font-weight:600}
+  /* ---- loop engine ---- */
+  .loop-grid{display:grid;grid-template-columns:300px 1fr;gap:18px}
+  .loop-diagram{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 4px}
+  .loop-diagram .ld{background:#eef4ff;border:1px solid #d6e4fb;color:#23568f;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:8px}
+  .loop-diagram .arr{color:var(--sky);font-weight:800}
+  .loop-summary{padding:14px 18px;border-radius:13px;font-size:15px;margin-bottom:16px}
+  .loop-summary.ok{background:#e8f7f0;border:1px solid #bfe6d4}
+  .loop-summary.warn{background:#fff6e6;border:1px solid #f0dcad}
+  .iter{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px;background:#fff;box-shadow:var(--shadow2)}
+  .iter-h{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px;color:var(--navy);margin-bottom:10px}
+  .iter-n{background:linear-gradient(120deg,var(--steel),var(--sky));color:#fff;font-size:12px;padding:2px 10px;border-radius:999px}
+  .phase{display:flex;gap:10px;font-size:13px;padding:5px 0;align-items:flex-start}
+  .ph-tag{flex:none;width:64px;color:var(--muted);font-weight:700;font-size:12px}
+  .phase.fix{background:#fff6e6;border-radius:9px;padding:8px 10px;color:#7a4f00}
+  .phase.done{background:#e8f7f0;border-radius:9px;padding:8px 10px;color:#137a55}
+  .verdict{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:7px;margin:2px 4px 2px 0}
+  .verdict.pass{background:#e3f6ee;color:#137a55}
+  .verdict.fail{background:#fde6e6;color:#bc3030}
 </style>
 </head>
 <body>
@@ -259,6 +277,7 @@
       <button data-v="tools">出口工具</button>
       <button data-v="pipe">商談管線</button>
       <button data-v="learn">學習中心</button>
+      <button data-v="loop">Loop 引擎</button>
       <button data-v="sup">供應商</button>
       <button data-v="proc">法規流程</button>
       <button data-v="obs">市場觀察</button>
@@ -595,6 +614,25 @@
       <div class="cap-row"><span class="nm">多語在地化</span><span class="track"><span class="fill" style="width:40%"></span></span><span class="pct">40% 研發</span></div>
       <div class="note">藍圖將隨資料量、商談筆數與教學累積自動提升成熟度。</div>
     </div>
+  </div>
+</section>
+
+<!-- ===================== LOOP ENGINE ===================== -->
+<section class="view" id="view-loop">
+  <h2 class="section">🔄 Loop 引擎 ｜ 自我驗證與修正</h2>
+  <p class="lead">給定出口目標，Agent 會跑「目標→思考→行動→觀察→評估→修正」的迭代循環，用客觀門檻自我驗證；不達標就自動改策略重跑，達標後把經驗沉澱進知識庫並<b>調整媒合權重</b>，影響日後推薦。</p>
+  <div class="loop-diagram">
+    <span class="ld">🎯 目標</span><span class="arr">→</span><span class="ld">🤔 思考</span><span class="arr">→</span><span class="ld">⚡ 行動</span><span class="arr">→</span><span class="ld">👁 觀察</span><span class="arr">→</span><span class="ld">✓ 評估</span><span class="arr">→</span><span class="ld">🔧 修正</span><span class="arr">↻</span><span class="ld">🧠 沉澱</span>
+  </div>
+  <div class="loop-grid" style="margin-top:14px">
+    <div class="card form-card">
+      <label>目標品項</label><select id="lp-prod"></select>
+      <label>起始目標市場</label><select id="lp-market"></select>
+      <div class="note">驗證門檻：市場狀態 ≠ 暫停、媒合分數 ≥ 75、出口就緒度 ≥ 80%。未達標 Agent 會自動修正策略（換市場／換供應商／排補件）最多 5 次。</div>
+      <button class="btn" style="margin-top:14px;width:100%" onclick="runLoop()">▶ 執行 Agent Loop</button>
+      <button class="btn ghost" style="margin-top:8px;width:100%" onclick="resetWeights()">重設媒合權重</button>
+    </div>
+    <div id="loop-out"><p style="color:var(--muted)">選擇品項與起始市場後執行，下方會逐迭代展示思考、行動、驗證與修正過程。試試「干貝 → 中國」看 Agent 如何偵測暫停並自動改道。</p></div>
   </div>
 </section>
 
@@ -951,14 +989,7 @@ function runMatch(){
   const region=REGION_OF[mk],box=document.getElementById('match-results');
   let html='';
   if(matchRole==='buyer'){
-    const scored=SUP.map(s=>{
-      let sc=0,why=[];
-      if(s.prod.includes(prod)){sc+=40;why.push('主力品項契合')}else if(s.prod.some(p=>p.includes(prod.slice(0,2)))){sc+=24}else{sc+=12}
-      if(s.mk.includes('全球')||s.mk.includes(region)){sc+=30;why.push(region+'通路覆蓋')}else{sc+=12}
-      if(cert){if(s.cert.some(x=>x.includes(cert))){sc+=20;why.push(cert+'認證')}else{sc+=6}}else{sc+=(s.cert.some(x=>/HACCP|EU/.test(x))?18:12)}
-      sc+=Math.round(STSCORE[co.st]/10);
-      return {s,sc:Math.min(99,sc),why};
-    }).sort((a,b)=>b.sc-a.sc).slice(0,5);
+    const scored=SUP.map(s=>{const r=supScore(s,prod,region,cert,co);return {s,sc:r.sc,why:r.why};}).sort((a,b)=>b.sc-a.sc).slice(0,5);
     html=`<div class="note" style="margin-bottom:14px">為<b>海外買家</b>媒合 ${prod} → ${co.f}${co.n} 的供應商（${co.stl}）。</div>`+
       scored.map(m=>`<div class="card match-card"><div class="ring" style="background:${ringColor(m.sc)}">${m.sc}<small style="font-size:9px">%</small></div>
         <div class="info"><h4>${m.s.n}</h4>
@@ -987,17 +1018,7 @@ document.getElementById('tool-subtabs').addEventListener('click',e=>{if(!e.targe
 function runCheck(){
   const prod=document.getElementById('c-prod').value,mk=document.getElementById('c-market').value,
     co=COUNTRIES.find(c=>c.id===mk);
-  const sups=SUP.filter(s=>s.prod.includes(prod)),hasEU=sups.some(s=>s.cert.includes('EU')),hasHACCP=sups.some(s=>s.cert.some(x=>x.includes('HACCP')));
-  const items=co.req.map(r=>({t:r[0],ok:Math.random()>0}));
-  // deterministic readiness logic
-  const checks=[
-   {t:co.req[0]?co.req[0][0]:'衛生證明書',ok:true},
-   {t:'放射性物質檢驗證明',ok:co.id!=='cn'},
-   {t:'產地證明書',ok:true},
-   {t:'HACCP / 施設認定',ok:hasHACCP},
-   {t:co.id==='cn'?'中國設施再登錄(GACC)':co.id==='kr'?'漁獲證明書(秋刀魚等)':'目的國輸入報驗',ok:co.st==='open'}
-  ];
-  const done=checks.filter(c=>c.ok).length,score=Math.round(done/checks.length*100);
+  const {checks,score}=computeChecks(prod,co);
   const col=score>=80?'var(--good)':score>=50?'var(--warn)':'var(--bad)';
   document.getElementById('check-out').innerHTML=
    `<div class="gauge"><div class="num" style="color:${col}">${score}%</div><div style="color:var(--muted);font-size:13px">出口就緒度　·　${co.f}${co.n}（${co.stl}）</div></div>
@@ -1132,6 +1153,125 @@ answer=function(q){
   if(hits.length) r+=`\n\n🧠 <b>我學到的相關情報：</b>\n`+hits.map(h=>'• '+h.text).join('\n');
   return r;
 };
+
+/* ====================== LOOP ENGINE ====================== */
+const WT_KEY='seaexport_weights_v1';
+const WT_DEFAULT={prod:40,market:30,cert:20,status:10};
+function loadWeights(){try{return Object.assign({},WT_DEFAULT,JSON.parse(localStorage.getItem(WT_KEY))||{})}catch(e){return {...WT_DEFAULT}}}
+function saveWeights(w){try{localStorage.setItem(WT_KEY,JSON.stringify(w))}catch(e){}}
+let WEIGHTS=loadWeights();
+function resetWeights(){WEIGHTS={...WT_DEFAULT};saveWeights(WEIGHTS);alert('媒合權重已重設為預設 40/30/20/10。');}
+/* weighted supplier score — shared by 智能媒合 and Loop */
+function supScore(s,prod,region,cert,co){
+  const w=WEIGHTS;let sc=0,why=[];
+  if(s.prod.includes(prod)){sc+=w.prod;why.push('主力品項契合')}
+  else if(s.prod.some(p=>p.includes((prod||'').slice(0,2)))){sc+=w.prod*0.6}else{sc+=w.prod*0.3}
+  if(s.mk.includes('全球')||s.mk.includes(region)){sc+=w.market;why.push(region+'通路覆蓋')}else{sc+=w.market*0.4}
+  if(cert){if(s.cert.some(x=>x.includes(cert))){sc+=w.cert;why.push(cert+'認證')}else{sc+=w.cert*0.3}}
+  else{sc+=(s.cert.some(x=>/HACCP|EU/.test(x))?w.cert*0.9:w.cert*0.6)}
+  sc+=w.status*STSCORE[co.st]/100;
+  return {sc:Math.min(99,Math.round(sc)),why};
+}
+function computeChecks(prod,co){
+  const sups=SUP.filter(s=>s.prod.includes(prod));
+  const hasHACCP=sups.some(s=>s.cert.some(x=>x.includes('HACCP')||x.includes('EU')));
+  const checks=[
+   {t:co.req[0]?co.req[0][0]:'衛生證明書',ok:true},
+   {t:'放射性物質檢驗證明',ok:co.id!=='cn'},
+   {t:'產地證明書',ok:true},
+   {t:'HACCP / 施設認定',ok:hasHACCP},
+   {t:co.id==='cn'?'中國設施再登錄(GACC)':co.id==='kr'?'漁獲證明書(秋刀魚等)':'目的國輸入報驗',ok:co.st==='open'}
+  ];
+  const score=Math.round(checks.filter(c=>c.ok).length/checks.length*100);
+  return {checks,score};
+}
+function bestSupplier(prod,mk){
+  const co=COUNTRIES.find(c=>c.id===mk),region=REGION_OF[mk];let best=null;
+  SUP.forEach(s=>{const r=supScore(s,prod,region,'',co);if(!best||r.sc>best.sc)best={s,sc:r.sc,why:r.why}});
+  return best;
+}
+function oppScore(prod,mkId){const c=COUNTRIES.find(x=>x.id===mkId);return Math.round(affinity(prod,mkId)*0.6+STSCORE[c.st]*0.4);}
+function addKnowledge(text,src,kw){const a=loadKnow()||[];a.unshift({text,src,kw:kw||[]});saveKnow(a);if(typeof renderLearn==='function')renderLearn();}
+function adjustWeights(key){
+  const before={...WEIGHTS},inc=4,others=['prod','market','cert','status'].filter(k=>k!==key);
+  const oSum=others.reduce((a,k)=>a+before[k],0);
+  WEIGHTS[key]=before[key]+inc;
+  others.forEach(k=>WEIGHTS[k]=Math.max(5,Math.round(before[k]-inc*before[k]/oSum)));
+  let s=WEIGHTS.prod+WEIGHTS.market+WEIGHTS.cert+WEIGHTS.status;WEIGHTS[key]+=100-s;
+  saveWeights(WEIGHTS);return {before,after:{...WEIGHTS},key};
+}
+const GOAL_READY=80,GOAL_MATCH=75,MAX_ITER=5;
+function runLoop(){
+  const prod=document.getElementById('lp-prod').value;
+  let mk=document.getElementById('lp-market').value;
+  const log=[];let switched=false,iter=0,success=false;
+  while(iter<MAX_ITER){
+    iter++;
+    const co=COUNTRIES.find(c=>c.id===mk);
+    const best=bestSupplier(prod,mk);
+    const {checks,score:readiness}=computeChecks(prod,co);
+    const obs={status:co.stl,match:best.sc,readiness,opp:oppScore(prod,mk)};
+    const passStatus=co.st!=='stop',passMatch=best.sc>=GOAL_MATCH,passReady=readiness>=GOAL_READY;
+    const verdicts=[
+      {k:'市場狀態≠暫停',ok:passStatus,v:co.stl},
+      {k:'媒合分數 ≥ '+GOAL_MATCH,ok:passMatch,v:best.sc},
+      {k:'就緒度 ≥ '+GOAL_READY+'%',ok:passReady,v:readiness+'%'}
+    ];
+    const plan=`鎖定 ${prod} → ${co.f}${co.n}：檢視市場狀態、媒合最佳供應商、評估出口就緒度。`;
+    if(passStatus&&passMatch&&passReady){success=true;log.push({iter,co:co.n,plan,best,obs,verdicts,fix:null});break;}
+    let fix=null;
+    if(!passStatus){
+      const alt=COUNTRIES.filter(c=>c.st!=='stop'&&c.id!==mk).map(c=>({c,o:oppScore(prod,c.id)})).sort((a,b)=>b.o-a.o)[0];
+      fix=`市場「${co.n}」目前暫停 → 自動改道至機會分數最高的替代市場「${alt.c.n}」（機會 ${alt.o}）。`;switched=true;
+      log.push({iter,co:co.n,plan,best,obs,verdicts,fix});mk=alt.c.id;continue;
+    }
+    if(!passReady){
+      const miss=checks.filter(c=>!c.ok).map(c=>c.t);
+      const alt=COUNTRIES.filter(c=>c.st==='open'&&c.id!==mk).map(c=>({c,r:computeChecks(prod,c).score})).sort((a,b)=>b.r-a.r)[0];
+      if(alt&&alt.r>readiness){
+        fix=`就緒度不足（缺：${miss.join('、')}）→ 改採就緒度更高的市場「${alt.c.n}」（${alt.r}%）。`;
+        log.push({iter,co:co.n,plan,best,obs,verdicts,fix});mk=alt.c.id;continue;
+      } else {
+        fix=`就緒度不足（缺：${miss.join('、')}）→ 已無更高就緒市場，排定補件並標記需人工介入。`;
+        log.push({iter,co:co.n,plan,best,obs,verdicts,fix});break;
+      }
+    }
+    if(!passMatch){
+      const alt=COUNTRIES.filter(c=>c.id!==mk).map(c=>({c,o:affinity(prod,c.id)})).sort((a,b)=>b.o-a.o)[0];
+      fix=`媒合分數偏低 → 切換至品項需求更高的市場「${alt.c.n}」。`;
+      log.push({iter,co:co.n,plan,best,obs,verdicts,fix});mk=alt.c.id;continue;
+    }
+  }
+  let wDelta=null;
+  if(switched)wDelta=adjustWeights('status');
+  const fco=COUNTRIES.find(c=>c.id===mk),last=log[log.length-1];
+  if(success)addKnowledge(`Loop 達標：${prod} → ${fco.n}（媒合 ${last.best.sc}・就緒 ${last.obs.readiness}%）`,'deal',[prod,fco.n]);
+  renderLoop(log,success,prod,mk,wDelta,iter);
+  bumpLearn('loop');
+}
+function renderLoop(log,success,prod,finalMk,wDelta,iters){
+  const co=COUNTRIES.find(c=>c.id===finalMk),out=document.getElementById('loop-out');
+  let html=`<div class="loop-summary ${success?'ok':'warn'}">${success?'✅ <b>目標達成</b>':'⚠️ <b>已盡力最佳化，建議人工介入</b>'}　·　${prod} → ${co.f}${co.n}　·　共 ${iters} 次迭代</div>`;
+  log.forEach(e=>{
+    html+=`<div class="iter"><div class="iter-h"><span class="iter-n">迭代 ${e.iter}</span> 市場：${e.co}</div>
+      <div class="phase"><span class="ph-tag">🎯 目標</span>${prod} 可順利出口並通過所有驗證門檻</div>
+      <div class="phase"><span class="ph-tag">🤔 思考</span>${e.plan}</div>
+      <div class="phase"><span class="ph-tag">⚡ 行動</span>媒合最佳供應商「${e.best.s.n}」（${e.best.sc}）、執行法規就緒檢核</div>
+      <div class="phase"><span class="ph-tag">👁 觀察</span>狀態 ${e.obs.status}｜媒合 ${e.obs.match}｜就緒 ${e.obs.readiness}%｜機會 ${e.obs.opp}</div>
+      <div class="phase"><span class="ph-tag">✓ 評估</span><span>${e.verdicts.map(v=>`<span class="verdict ${v.ok?'pass':'fail'}">${v.ok?'✓':'✗'} ${v.k}（${v.v}）</span>`).join('')}</span></div>
+      ${e.fix?`<div class="phase fix"><span class="ph-tag">🔧 修正</span>${e.fix}</div>`:`<div class="phase done"><span class="ph-tag">🏁 完成</span>全部門檻通過，停止迭代。</div>`}
+    </div>`;
+  });
+  if(wDelta){
+    const nm={prod:'品項契合',market:'市場覆蓋',cert:'認證',status:'市場現況'};
+    html+=`<div class="card panel" style="margin-top:14px"><h3>🧠 自我修正：媒合權重已更新</h3>
+     <p style="font-size:13px;color:var(--muted)">偵測到「市場狀態」是本次失敗主因，Agent 自動<b>提高「市場現況」權重</b>，讓日後「智能媒合」更避開受限市場。</p>
+     ${['prod','market','cert','status'].map(k=>{const b=wDelta.before[k],a=wDelta.after[k],d=a-b;return `<div class="cap-row"><span class="nm">${nm[k]}</span><span class="track"><span class="fill" style="width:${a*1.6}%"></span></span><span class="pct">${b}→${a}${d?` (${d>0?'+':''}${d})`:''}</span></div>`}).join('')}</div>`;
+  }
+  html+=`<div class="note" style="margin-top:12px">結果已沉澱進「學習中心」知識庫；媒合權重存於本機，將實際影響「智能媒合」的推薦排序。這就是 Loop Engineering：可控、可驗證、可累積。</div>`;
+  out.innerHTML=html;
+}
+fillProd('lp-prod');fillMarket('lp-market');
 </script>
 </body>
 </html>
