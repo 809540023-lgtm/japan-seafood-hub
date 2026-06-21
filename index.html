@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>日本海產出口 AI 統籌中心 ｜ 全亞洲</title>
+<style>
+  :root{
+    --navy:#0b2545;--navy2:#13315c;--steel:#134074;--sky:#3a86ff;--aqua:#00b4d8;
+    --ink:#0e1726;--paper:#f5f8fc;--card:#ffffff;--line:#dde6f0;--muted:#5b6b82;
+    --good:#1b9e6f;--warn:#e08a00;--bad:#d64545;--gold:#caa24a;
+    --shadow:0 6px 24px rgba(11,37,69,.08);--shadow2:0 2px 8px rgba(11,37,69,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:"Hiragino Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--steel)}
+  /* ---------- Top bar ---------- */
+  header.topbar{position:sticky;top:0;z-index:50;background:linear-gradient(100deg,var(--navy),var(--steel));
+    color:#fff;box-shadow:var(--shadow)}
+  .topwrap{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:18px;letter-spacing:.5px}
+  .brand .logo{width:40px;height:40px;border-radius:11px;background:radial-gradient(circle at 30% 30%,var(--aqua),var(--sky));
+    display:grid;place-items:center;font-size:22px;box-shadow:inset 0 0 12px rgba(255,255,255,.3)}
+  .brand small{display:block;font-weight:500;font-size:11px;opacity:.8;letter-spacing:1px}
+  nav.tabs{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+  nav.tabs button{background:transparent;border:0;color:#cfe0f5;font-size:13.5px;font-weight:600;
+    padding:8px 13px;border-radius:9px;cursor:pointer;transition:.15s;font-family:inherit}
+  nav.tabs button:hover{background:rgba(255,255,255,.12);color:#fff}
+  nav.tabs button.active{background:#fff;color:var(--navy)}
+  /* ---------- Alert ribbon ---------- */
+  .ribbon{background:#fff4e2;border-bottom:1px solid #f0d9ad;color:#7a4f00;font-size:13px}
+  .ribbon .rwrap{max-width:1200px;margin:0 auto;padding:9px 20px;display:flex;gap:10px;align-items:center}
+  .ribbon b{color:#a35a00}
+  .pulse{flex:none;width:9px;height:9px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 rgba(214,69,69,.5);animation:pl 2s infinite}
+  @keyframes pl{0%{box-shadow:0 0 0 0 rgba(214,69,69,.5)}70%{box-shadow:0 0 0 8px rgba(214,69,69,0)}100%{box-shadow:0 0 0 0 rgba(214,69,69,0)}}
+  /* ---------- Layout ---------- */
+  main{max-width:1200px;margin:0 auto;padding:24px 20px 60px}
+  .view{display:none;animation:fade .25s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h2.section{font-size:22px;margin:4px 0 4px;display:flex;align-items:center;gap:10px}
+  .lead{color:var(--muted);margin:0 0 22px;font-size:14.5px;max-width:760px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow2)}
+  .grid{display:grid;gap:16px}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:.3px}
+  .b-blue{background:#e7f0ff;color:#1f5fbf}.b-green{background:#e3f6ee;color:#137a55}
+  .b-gold{background:#fbf2da;color:#9a7414}.b-red{background:#fde6e6;color:#bc3030}
+  .b-gray{background:#eef2f7;color:#5b6b82}.b-purple{background:#efe7fb;color:#6b3fbf}
+  /* ---------- Dashboard ---------- */
+  .hero{background:linear-gradient(120deg,var(--navy),#15406e 55%,var(--steel));color:#fff;border-radius:20px;
+    padding:26px 28px;position:relative;overflow:hidden;margin-bottom:20px}
+  .hero:after{content:"";position:absolute;right:-40px;bottom:-60px;width:260px;height:260px;border-radius:50%;
+    background:radial-gradient(circle,rgba(0,180,216,.35),transparent 70%)}
+  .hero h1{margin:0 0 8px;font-size:25px}
+  .hero p{margin:0;max-width:620px;opacity:.9;font-size:14px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 6px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;box-shadow:var(--shadow2)}
+  .kpi .v{font-size:23px;font-weight:800;color:var(--navy)}
+  .kpi .l{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .kpi .d{font-size:11.5px;font-weight:700;margin-top:6px}
+  .up{color:var(--good)}.down{color:var(--bad)}
+  .two{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:16px}
+  .panel{padding:18px 20px}
+  .panel h3{margin:0 0 14px;font-size:15.5px}
+  /* bars */
+  .bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
+  .bar .nm{width:78px;flex:none;color:var(--ink);font-weight:600}
+  .bar .track{flex:1;background:#eef2f7;border-radius:8px;height:14px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--sky),var(--aqua))}
+  .bar .val{width:62px;text-align:right;flex:none;color:var(--muted);font-weight:600}
+  /* ---------- AI Agent ---------- */
+  .agent-wrap{display:grid;grid-template-columns:1fr 320px;gap:18px}
+  .chat{display:flex;flex-direction:column;height:560px;overflow:hidden}
+  .chat .head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:11px;background:#fbfdff;border-radius:16px 16px 0 0}
+  .avatar{width:38px;height:38px;border-radius:11px;background:radial-gradient(circle at 30% 30%,var(--aqua),var(--sky));display:grid;place-items:center;font-size:20px;flex:none}
+  .chat .head b{font-size:15px}.chat .head span{font-size:11.5px;color:var(--good);display:flex;align-items:center;gap:5px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+  .log{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:13px;background:linear-gradient(180deg,#fafcff,#f3f7fc)}
+  .msg{max-width:80%;padding:11px 14px;border-radius:14px;font-size:14px;white-space:pre-wrap;box-shadow:var(--shadow2)}
+  .msg.ai{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.me{background:linear-gradient(120deg,var(--steel),var(--sky));color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .msg.ai b{color:var(--navy)}
+  .typing{align-self:flex-start;color:var(--muted);font-size:13px;padding:6px 4px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;padding:10px 14px;border-top:1px solid var(--line);background:#fff}
+  .chip{background:#eef4ff;border:1px solid #d6e4fb;color:#23568f;font-size:12px;padding:6px 11px;border-radius:999px;cursor:pointer;transition:.15s;font-family:inherit}
+  .chip:hover{background:#dde9ff}
+  .composer{display:flex;gap:9px;padding:12px 14px;border-top:1px solid var(--line);background:#fff;border-radius:0 0 16px 16px}
+  .composer input{flex:1;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font-size:14px;font-family:inherit;outline:none}
+  .composer input:focus{border-color:var(--sky)}
+  .composer button{background:linear-gradient(120deg,var(--steel),var(--sky));color:#fff;border:0;border-radius:11px;padding:0 18px;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px}
+  .side h4{margin:0 0 10px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .side .item{padding:11px 13px;border:1px solid var(--line);border-radius:11px;margin-bottom:9px;font-size:13px;cursor:pointer;transition:.15s;background:#fff}
+  .side .item:hover{border-color:var(--sky);box-shadow:var(--shadow2)}
+  .side .item b{display:block;font-size:13.5px;margin-bottom:2px}
+  .side .item span{color:var(--muted);font-size:12px}
+  /* ---------- Suppliers ---------- */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+  .filters select,.filters input{border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13.5px;font-family:inherit;background:#fff;outline:none}
+  .filters select:focus,.filters input:focus{border-color:var(--sky)}
+  .sup-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+  .sup{padding:18px 20px;display:flex;flex-direction:column;gap:9px}
+  .sup .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .sup h3{margin:0;font-size:16px}
+  .sup .jp{font-size:12px;color:var(--muted);margin-top:1px}
+  .sup .meta{font-size:13px;color:var(--ink)}
+  .sup .meta b{color:var(--muted);font-weight:600}
+  .sup .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+  .sup .desc{font-size:13px;color:var(--muted);border-top:1px dashed var(--line);padding-top:9px}
+  .cat-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:8px;white-space:nowrap}
+  .c1{background:#e7f0ff;color:#1f5fbf}.c2{background:#e3f6ee;color:#137a55}.c3{background:#fbf2da;color:#9a7414}
+  /* ---------- Process wizard ---------- */
+  .wiz{display:grid;grid-template-columns:230px 1fr;gap:18px}
+  .country-list{display:flex;flex-direction:column;gap:7px}
+  .country-list button{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:#fff;
+    border-radius:11px;padding:11px 13px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;transition:.15s;color:var(--ink)}
+  .country-list button:hover{border-color:var(--sky)}
+  .country-list button.active{background:linear-gradient(120deg,var(--steel),var(--sky));color:#fff;border-color:transparent}
+  .country-list .flag{font-size:18px}
+  .country-list .st{margin-left:auto;width:9px;height:9px;border-radius:50%}
+  .stp-open{background:var(--good)}.stp-cond{background:var(--warn)}.stp-stop{background:var(--bad)}
+  .proc .stat{padding:16px 20px;border-radius:13px;margin-bottom:16px;font-size:13.5px}
+  .proc .stat.open{background:#e8f7f0;border:1px solid #bfe6d4}
+  .proc .stat.cond{background:#fff6e6;border:1px solid #f0dcad}
+  .proc .stat.stop{background:#fdeaea;border:1px solid #f2c4c4}
+  .steps{counter-reset:s;list-style:none;padding:0;margin:0}
+  .steps li{position:relative;padding:0 0 18px 46px;border-left:2px solid var(--line);margin-left:16px}
+  .steps li:last-child{border-left:2px solid transparent;padding-bottom:0}
+  .steps li:before{counter-increment:s;content:counter(s);position:absolute;left:-16px;top:-2px;width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(120deg,var(--steel),var(--sky));color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px}
+  .steps li h4{margin:0 0 3px;font-size:14.5px}
+  .steps li p{margin:0;font-size:13px;color:var(--muted)}
+  .steps li .doc{margin-top:6px;font-size:12px;color:var(--steel)}
+  .req-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:8px 0 18px}
+  .req{border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:12.5px;background:#fbfdff}
+  .req b{display:block;font-size:13px;margin-bottom:3px;color:var(--navy)}
+  /* ---------- Observation ---------- */
+  .obs-method{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px}
+  .om{padding:16px 18px;border-top:3px solid var(--sky)}
+  .om h4{margin:0 0 6px;font-size:14.5px}.om p{margin:0;font-size:12.5px;color:var(--muted)}
+  .om .icon{font-size:22px;margin-bottom:6px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f3f7fc;font-size:12px;color:var(--muted);position:sticky;top:0}
+  tr:hover td{background:#fafcff}
+  .obs-form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+  .obs-form textarea,.obs-form input,.obs-form select{border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:inherit;font-size:13px;outline:none;width:100%}
+  .obs-form textarea{grid-column:1/-1;resize:vertical;min-height:54px}
+  .btn{background:linear-gradient(120deg,var(--steel),var(--sky));color:#fff;border:0;border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13.5px}
+  .btn.ghost{background:#fff;color:var(--steel);border:1px solid var(--line)}
+  .tag-s{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:700}
+  /* ---------- Cases ---------- */
+  .cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+  .case{padding:20px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+  .case .ribbon-c{position:absolute;top:14px;right:-30px;transform:rotate(40deg);background:var(--gold);color:#fff;font-size:10px;font-weight:800;padding:3px 34px}
+  .case h3{margin:0;font-size:16.5px}
+  .case .who{font-size:12.5px;color:var(--muted)}
+  .case .stat-row{display:flex;gap:16px;margin:4px 0;flex-wrap:wrap}
+  .case .stat-row .s b{font-size:19px;color:var(--good)}
+  .case .stat-row .s span{font-size:11.5px;color:var(--muted);display:block}
+  .case p{margin:0;font-size:13px;color:var(--ink)}
+  .timeline{border-top:1px dashed var(--line);padding-top:10px;font-size:12.5px;color:var(--muted)}
+  /* ---------- misc ---------- */
+  .src{margin-top:30px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+  .src a{color:var(--steel);text-decoration:none}.src a:hover{text-decoration:underline}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+  .note{font-size:12px;color:var(--muted);background:#f3f7fc;border-radius:10px;padding:10px 13px;margin-top:10px}
+  @media(max-width:900px){
+    .kpis{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.agent-wrap{grid-template-columns:1fr}
+    .wiz{grid-template-columns:1fr}.obs-form{grid-template-columns:1fr}.country-list{flex-direction:row;flex-wrap:wrap}
+    .country-list button{flex:1 1 30%}
+    .agent-wrap{grid-template-columns:1fr}.match-grid,.tool-grid{grid-template-columns:1fr!important}
+    .pipe-board{grid-template-columns:1fr!important}.lines{grid-template-columns:repeat(2,1fr)!important}
+  }
+  /* ---- mission / lines ---- */
+  .mission{background:#fbfdff;border:1px solid var(--line);border-radius:16px;padding:18px 22px;margin-bottom:20px}
+  .mission h3{margin:0 0 6px;font-size:15px;color:var(--navy)}
+  .mission p{margin:0;font-size:13.5px;color:var(--muted);max-width:860px}
+  .lines{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:14px 0 0}
+  .line{border:1px solid var(--line);border-radius:13px;padding:14px 12px;text-align:center;background:var(--card);transition:.15s;position:relative}
+  .line.live{border-color:var(--aqua);box-shadow:0 0 0 2px rgba(0,180,216,.12)}
+  .line .em{font-size:26px}.line .nm{font-weight:700;font-size:13px;margin-top:4px}
+  .line .stt{font-size:10.5px;margin-top:3px}
+  .line .stt.on{color:var(--good);font-weight:700}.line .stt.soon{color:var(--muted)}
+  /* ---- automation flow ---- */
+  .flow{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:6px 2px}
+  .flow .node{flex:1;min-width:120px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 12px;text-align:center;position:relative}
+  .flow .node .em{font-size:22px}.flow .node b{display:block;font-size:12.5px;margin-top:4px}
+  .flow .node span{font-size:11px;color:var(--muted)}
+  .flow .arrow{display:flex;align-items:center;color:var(--sky);font-size:20px;padding:0 6px;flex:none}
+  .auto-badge{position:absolute;top:-8px;right:-8px;background:var(--aqua);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px}
+  /* ---- matching ---- */
+  .match-grid{display:grid;grid-template-columns:300px 1fr;gap:18px}
+  .form-card{padding:18px 20px}
+  .form-card label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:12px 0 5px}
+  .form-card select,.form-card input,.form-card textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;outline:none}
+  .form-card select:focus,.form-card input:focus{border-color:var(--sky)}
+  .seg{display:flex;gap:6px}.seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px;font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:600;color:var(--muted)}
+  .seg button.on{background:linear-gradient(120deg,var(--steel),var(--sky));color:#fff;border-color:transparent}
+  .match-card{padding:15px 18px;margin-bottom:13px;display:flex;gap:14px;align-items:center}
+  .ring{flex:none;width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:15px;color:#fff}
+  .match-card .info{flex:1}.match-card .info h4{margin:0 0 2px;font-size:15px}
+  .match-card .info .why{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .mini-badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef4ff;color:#2a5fa0;margin-right:4px}
+  /* ---- tools ---- */
+  .subtabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .subtabs button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--muted)}
+  .subtabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .tool-grid{display:grid;grid-template-columns:330px 1fr;gap:18px}
+  .checklist{list-style:none;padding:0;margin:0}
+  .checklist li{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+  .checklist li .ck{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:13px;font-weight:800}
+  .ck.ok{background:#e3f6ee;color:var(--good)}.ck.req{background:#fff4e2;color:var(--warn)}
+  .gauge{text-align:center;padding:18px}
+  .gauge .num{font-size:40px;font-weight:800}
+  .calc-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+  .calc-row.total{border-bottom:0;border-top:2px solid var(--navy);font-weight:800;font-size:16px;color:var(--navy);margin-top:4px;padding-top:12px}
+  .doc-out{background:#0e1726;color:#cfe0f5;border-radius:12px;padding:16px 18px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;white-space:pre-wrap;line-height:1.7;max-height:420px;overflow:auto}
+  /* ---- pipeline ---- */
+  .pipe-board{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .col{background:#f3f7fc;border-radius:13px;padding:10px;min-height:120px}
+  .col h4{margin:0 0 10px;font-size:12.5px;text-align:center;color:var(--navy);display:flex;justify-content:center;gap:6px;align-items:center}
+  .col h4 .cnt{background:#fff;border:1px solid var(--line);border-radius:999px;font-size:11px;padding:0 7px;color:var(--muted)}
+  .deal{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 11px;margin-bottom:9px;box-shadow:var(--shadow2);font-size:12.5px}
+  .deal b{font-size:13px;display:block}
+  .deal .sub{color:var(--muted);font-size:11.5px;margin:3px 0 7px}
+  .deal .mv{display:flex;gap:5px}
+  .deal .mv button{flex:1;border:1px solid var(--line);background:#fafcff;border-radius:7px;font-size:13px;cursor:pointer;padding:2px;color:var(--steel)}
+  .deal .mv button:hover{background:#eef4ff}
+  /* ---- learning ---- */
+  .learn-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .lstat{padding:16px 18px;border-left:3px solid var(--aqua)}
+  .lstat .v{font-size:26px;font-weight:800;color:var(--navy)}.lstat .l{font-size:12px;color:var(--muted)}
+  .know-item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .know-item .src-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;flex:none}
+  .st-obs{background:#e7f0ff;color:#2a5fa0}.st-deal{background:#e3f6ee;color:#137a55}.st-user{background:#efe7fb;color:#6b3fbf}.st-reg{background:#fff4e2;color:#9a7414}
+  .cap-row{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:13.5px}
+  .cap-row .nm{width:130px;flex:none;font-weight:600}
+  .cap-row .track{flex:1;background:#eef2f7;border-radius:8px;height:12px;overflow:hidden}
+  .cap-row .fill{height:100%;background:linear-gradient(90deg,var(--good),var(--aqua))}
+  .cap-row .pct{width:80px;text-align:right;font-size:12px;color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topwrap">
+    <div class="brand">
+      <div class="logo">🐟</div>
+      <div>日本海產出口 AI 統籌中心
+        <small>JAPAN SEAFOOD EXPORT · AI COORDINATION HUB · ALL ASIA</small>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-v="dash" class="active">儀表板</button>
+      <button data-v="agent">AI 助理</button>
+      <button data-v="match">智能媒合</button>
+      <button data-v="tools">出口工具</button>
+      <button data-v="pipe">商談管線</button>
+      <button data-v="learn">學習中心</button>
+      <button data-v="sup">供應商</button>
+      <button data-v="proc">法規流程</button>
+      <button data-v="obs">市場觀察</button>
+      <button data-v="case">成功案例</button>
+    </nav>
+  </div>
+</header>
+
+<div class="ribbon">
+  <div class="rwrap">
+    <span class="pulse"></span>
+    <span><b>法規動態（2026/06）：</b>中國於 2025/11/19 因日本首相涉台言論<b>再度暫停</b>日本水產進口；設施再登錄 697 件僅 3 件通過。出口策略以<b>越南、台灣、美國、東南亞</b>多角化為主軸。</span>
+  </div>
+</div>
+
+<main>
+
+<!-- ===================== DASHBOARD ===================== -->
+<section class="view active" id="view-dash">
+  <div class="hero">
+    <h1>以 AI Agent 為核心的日本海產出口統籌平台</h1>
+    <p>整合四大類供應商、各亞洲市場出口法規線上流程、市場觀察記錄與成功案例。由 AI Agent 主導媒合、查法規、追蹤市場動態，協助布局全球海產通路。</p>
+  </div>
+
+  <div class="mission">
+    <h3>🎯 平台使命</h3>
+    <p>透過 AI、系統與自動化，協助所有希望將商品銷往全球的日本企業，以及在臺灣或其他國家經營的外國人士，一步步踏實地把日本產品推向全世界——投入日本產業、推動日本經濟。<b>海產線為首發旗艦線</b>，系統將沿同一套 AI 引擎逐步擴展至所有日本物產線。</p>
+    <div class="lines">
+      <div class="line live"><div class="em">🐟</div><div class="nm">海產</div><div class="stt on">● 營運中</div></div>
+      <div class="line"><div class="em">🍶</div><div class="nm">清酒・酒類</div><div class="stt soon">擴充中</div></div>
+      <div class="line"><div class="em">🥩</div><div class="nm">和牛・肉品</div><div class="stt soon">規劃中</div></div>
+      <div class="line"><div class="em">🍓</div><div class="nm">農產・水果</div><div class="stt soon">規劃中</div></div>
+      <div class="line"><div class="em">🍵</div><div class="nm">加工食品</div><div class="stt soon">規劃中</div></div>
+      <div class="line"><div class="em">💄</div><div class="nm">美妝・雜貨</div><div class="stt soon">規劃中</div></div>
+    </div>
+  </div>
+
+  <div class="card panel" style="margin-bottom:20px">
+    <h3>⚙️ AI Agent 自動化作業流（端到端）</h3>
+    <div class="flow">
+      <div class="node"><div class="em">🔎</div><b>需求擷取</b><span>品項×市場×認證</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="auto-badge">AI</div><div class="em">🤝</div><b>智能媒合</b><span>供應商評分</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="auto-badge">AI</div><div class="em">⚖️</div><b>法規檢核</b><span>就緒分數</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="auto-badge">AI</div><div class="em">🧮</div><b>成本試算</b><span>FOB→CIF</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="auto-badge">AI</div><div class="em">📄</div><b>文件產生</b><span>證明/Invoice</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="em">📊</div><b>商談管線</b><span>成交追蹤</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="auto-badge">LEARN</div><div class="em">🧠</div><b>學習回饋</b><span>越用越聰明</span></div>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">¥1.70 兆</div><div class="l">2025 農林水產・食品出口額</div><div class="d up">▲ 連續 13 年創新高</div></div>
+    <div class="kpi"><div class="v">¥905 億</div><div class="l">2025 干貝（生鮮等）出口額</div><div class="d up">▲ 30.4% vs 2024</div></div>
+    <div class="kpi"><div class="v">¥106 億</div><div class="l">2024 對越南干貝出口</div><div class="d up">▲ 約 13 倍（中國替代）</div></div>
+    <div class="kpi"><div class="v">3 / 697</div><div class="l">中國設施再登錄通過 / 申請</div><div class="d down">▼ 通關瓶頸</div></div>
+  </div>
+
+  <div class="two">
+    <div class="card panel">
+      <h3>主要出口市場排名（2025・農林水產食品總額）</h3>
+      <div class="bar"><span class="nm">🇺🇸 美國</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">¥2,762億</span></div>
+      <div class="bar"><span class="nm">🇭🇰 香港</span><span class="track"><span class="fill" style="width:81%"></span></span><span class="val">¥2,228億</span></div>
+      <div class="bar"><span class="nm">🇹🇼 台灣</span><span class="track"><span class="fill" style="width:66%"></span></span><span class="val">¥1,812億</span></div>
+      <div class="bar"><span class="nm">🇨🇳 中國</span><span class="track"><span class="fill" style="width:65%"></span></span><span class="val">¥1,799億</span></div>
+      <div class="note">中國為食品類（2025 +7.0%）；惟水產自 2025/11 起再度暫停，數字以食品整體計。</div>
+    </div>
+    <div class="card panel">
+      <h3>干貝出口市場別（2024 內訳）</h3>
+      <div class="bar"><span class="nm">🇺🇸 美國</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">¥191億</span></div>
+      <div class="bar"><span class="nm">🇹🇼 台灣</span><span class="track"><span class="fill" style="width:63%"></span></span><span class="val">¥121億</span></div>
+      <div class="bar"><span class="nm">🇻🇳 越南</span><span class="track"><span class="fill" style="width:55%"></span></span><span class="val">¥106億</span></div>
+      <div class="bar"><span class="nm">🇰🇷 韓國</span><span class="track"><span class="fill" style="width:41%"></span></span><span class="val">¥78億</span></div>
+      <div class="bar"><span class="nm">🇭🇰 香港</span><span class="track"><span class="fill" style="width:27%"></span></span><span class="val">¥51億</span></div>
+      <div class="note">越南成為干貝去殼加工樞紐，承接原銷中國的去殼/再加工需求。</div>
+    </div>
+  </div>
+
+  <div class="two" style="grid-template-columns:1fr 1fr">
+    <div class="card panel">
+      <h3>🤖 AI Agent 能為你做什麼</h3>
+      <div class="bar"><span class="nm">媒合</span><span style="font-size:13px;color:var(--muted)">依品項 × 目標市場 × 認證，推薦最合適的供應商</span></div>
+      <div class="bar"><span class="nm">查法規</span><span style="font-size:13px;color:var(--muted)">即時調出各國出口必備證明與線上申辦步驟</span></div>
+      <div class="bar"><span class="nm">追動態</span><span style="font-size:13px;color:var(--muted)">監控中國禁令、放射性檢驗、HACCP 名單變化</span></div>
+      <button class="btn" style="margin-top:8px" onclick="go('agent')">開始與 AI Agent 對話 →</button>
+    </div>
+    <div class="card panel">
+      <h3>中國市場狀態時間軸</h3>
+      <ul class="steps" style="font-size:13px">
+        <li><h4>2023/08 全面禁止</h4><p>福島處理水排放後，中國全面停止進口日本水產。</p></li>
+        <li><h4>2025/06 部分解禁</h4><p>有條件恢復，惟排除福島、東京等 10 都縣。</p></li>
+        <li><h4>2025/11/07 首批恢復</h4><p>北海道干貝 6.6 噸出貨，為禁令後首次。</p></li>
+        <li><h4>2025/11/19 再度暫停</h4><p>因首相涉台言論，中國再次暫停進口。</p></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card panel" style="margin-top:16px">
+    <h3>📡 最新市場動態（每日自動更新）</h3>
+    <div id="live-feed"></div>
+    <div class="note">此區由每日排程自動彙整中國禁令與各市場最新變化。最後更新時間見下方各則日期。</div>
+  </div>
+</section>
+
+<!-- ===================== AI AGENT ===================== -->
+<section class="view" id="view-agent">
+  <h2 class="section">🤖 AI Agent ｜ 出口統籌助理</h2>
+  <p class="lead">輸入你的品項、目標市場或法規問題，AI Agent 會即時媒合供應商、調出出口流程與必備證明，並提示最新市場風險。</p>
+  <div class="agent-wrap">
+    <div class="card chat">
+      <div class="head">
+        <div class="avatar">🤖</div>
+        <div><b>SeaExport Agent</b><span><span class="dot"></span> 線上 · 知識庫更新至 2026/06</span></div>
+      </div>
+      <div class="log" id="chatlog"></div>
+      <div class="chips" id="chips"></div>
+      <div class="composer">
+        <input id="chatin" placeholder="例如：我要把干貝出口到越南，要找誰、要哪些證明？" />
+        <button onclick="sendChat()">送出</button>
+      </div>
+    </div>
+    <div class="side">
+      <h4>快速情境</h4>
+      <div class="item" onclick="quickAsk('我要把干貝出口到越南，推薦供應商與流程')"><b>干貝 → 越南</b><span>去殼加工樞紐・中國替代</span></div>
+      <div class="item" onclick="quickAsk('黑鮪魚要出口到台灣與香港，要找哪家、要什麼認證？')"><b>黑鮪魚 → 台灣／香港</b><span>超低溫・高檔餐飲</span></div>
+      <div class="item" onclick="quickAsk('鰤魚出口到美國與東南亞，推薦哪家供應商？')"><b>鰤魚 → 美國／東南亞</b><span>養殖・活締・EU HACCP</span></div>
+      <div class="item" onclick="quickAsk('現在中國市場可以出口水產嗎？')"><b>中國市場現況？</b><span>禁令動態查詢</span></div>
+      <div class="item" onclick="quickAsk('EU HACCP 施設認定流程是什麼？')"><b>EU HACCP 認定流程</b><span>兩階段審查</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SUPPLIERS ===================== -->
+<section class="view" id="view-sup">
+  <h2 class="section">🏭 供應商目錄</h2>
+  <p class="lead">涵蓋日本四大水產巨頭、全國與地方漁聯、專業水產貿易商三大類。可依類別、品項、目標市場、認證篩選。</p>
+  <div class="filters">
+    <select id="f-cat" onchange="renderSup()">
+      <option value="">全部類別</option>
+      <option value="1">綜合型水產巨頭</option>
+      <option value="2">產地直供漁聯</option>
+      <option value="3">專業貿易商</option>
+    </select>
+    <select id="f-prod" onchange="renderSup()"><option value="">全部品項</option></select>
+    <select id="f-cert" onchange="renderSup()">
+      <option value="">全部認證</option>
+      <option value="HACCP">HACCP</option>
+      <option value="EU">EU 認定</option>
+      <option value="超低溫">超低溫冷鏈</option>
+    </select>
+    <input id="f-kw" placeholder="🔍 關鍵字（公司／產地）" oninput="renderSup()" style="flex:1;min-width:160px" />
+  </div>
+  <div class="note" style="margin-bottom:16px">
+    📊 目前收錄 <b id="sup-count">0</b> 家（持續擴充中）。要「全收錄」官方完整白名單，可比對：
+    <a href="https://kouseikyoku.mhlw.go.jp/kantoshinetsu/gyomu/bu_ka/shokuhin/yushutsushokuhin_00002.html" target="_blank" rel="noopener">EU 認定施設一覽</a> ・
+    <a href="https://www.maff.go.jp/j/shokusan/hq/i-4/yusyutu_shinsei_asia.html#china_seafood" target="_blank" rel="noopener">中國 GACC 登錄相關</a> ・
+    <a href="https://www.jetro.go.jp/agriportal/" target="_blank" rel="noopener">JETRO 輸出支援ポータル / Japan Street</a> ・
+    <a href="https://trade-seafood.com/directory/seafood/country/japan.htm" target="_blank" rel="noopener">日本水產出口商名錄</a>
+  </div>
+  <div class="sup-grid" id="supgrid"></div>
+</section>
+
+<!-- ===================== PROCESS ===================== -->
+<section class="view" id="view-proc">
+  <h2 class="section">📋 出口法規與線上申辦流程</h2>
+  <p class="lead">選擇目標市場，查看出口必備證明、線上申辦步驟與主管機關。日本水產出口由「農林水產物・食品輸出本部」統籌，各國要求不同。</p>
+  <div class="wiz">
+    <div class="country-list" id="countrylist"></div>
+    <div class="card panel proc" id="procbody"></div>
+  </div>
+</section>
+
+<!-- ===================== OBSERVATION ===================== -->
+<section class="view" id="view-obs">
+  <h2 class="section">📝 市場觀察記錄與方法</h2>
+  <p class="lead">標準化的市場觀察方法論與觀察記錄表。記錄會儲存在本機瀏覽器，方便持續追蹤各市場的價格、需求、法規與競品變化。</p>
+
+  <div class="obs-method">
+    <div class="card om"><div class="icon">💰</div><h4>價格觀察</h4><p>追蹤各市場批發/零售價、匯率波動、運費與關稅對到岸價的影響。</p></div>
+    <div class="card om" style="border-color:var(--aqua)"><div class="icon">📈</div><h4>需求觀察</h4><p>季節性需求、餐飲通路與超市採購週期、節慶備貨高峰。</p></div>
+    <div class="card om" style="border-color:var(--good)"><div class="icon">⚖️</div><h4>法規觀察</h4><p>放射性檢驗、HACCP 名單、二枚貝加工廠限制、禁令動態。</p></div>
+    <div class="card om" style="border-color:var(--warn)"><div class="icon">🥊</div><h4>競品觀察</h4><p>挪威鮭、智利、本地供應商的價格與通路策略對照。</p></div>
+  </div>
+
+  <div class="card panel">
+    <h3>新增觀察記錄</h3>
+    <div class="obs-form">
+      <select id="o-market"></select>
+      <select id="o-type">
+        <option>價格</option><option>需求</option><option>法規</option><option>競品</option><option>物流</option>
+      </select>
+      <select id="o-impact"><option value="高">影響：高</option><option value="中">影響：中</option><option value="低">影響：低</option></select>
+      <textarea id="o-note" placeholder="觀察內容（例如：越南去殼干貝 CIF 報價較上月上漲 4%，受運費影響）"></textarea>
+    </div>
+    <button class="btn" onclick="addObs()">＋ 加入記錄</button>
+    <button class="btn ghost" onclick="exportObs()">匯出 CSV</button>
+  </div>
+
+  <div class="card panel" style="margin-top:16px;overflow:auto;max-height:420px">
+    <table><thead><tr><th>日期</th><th>市場</th><th>類型</th><th>影響</th><th>觀察內容</th><th></th></tr></thead>
+    <tbody id="obsbody"></tbody></table>
+  </div>
+</section>
+
+<!-- ===================== CASES ===================== -->
+<section class="view" id="view-case">
+  <h2 class="section">🏆 成功案例</h2>
+  <p class="lead">日本海產出口亞洲市場的代表性成功案例，聚焦品牌化、市場多角化與加工樞紐策略。</p>
+  <div class="cases" id="caselist"></div>
+</section>
+
+<!-- ===================== MATCHING ===================== -->
+<section class="view" id="view-match">
+  <h2 class="section">🤝 智能媒合引擎</h2>
+  <p class="lead">買家與供應商雙向媒合。AI 依品項契合度、目標市場覆蓋、認證完備度與市場現況風險，計算匹配分數並排序推薦。</p>
+  <div class="match-grid">
+    <div class="card form-card">
+      <label>我的角色</label>
+      <div class="seg" id="m-role">
+        <button class="on" data-r="buyer">海外買家</button>
+        <button data-r="supplier">日本供應商</button>
+      </div>
+      <label>目標品項</label>
+      <select id="m-prod"></select>
+      <label>目標市場</label>
+      <select id="m-market">
+        <option value="vn">🇻🇳 越南</option><option value="tw">🇹🇼 台灣</option><option value="hk">🇭🇰 香港</option>
+        <option value="us">🇺🇸 美國</option><option value="th">🇹🇭 泰國</option><option value="kr">🇰🇷 韓國</option>
+        <option value="sg">🇸🇬 新加坡</option><option value="cn">🇨🇳 中國</option>
+      </select>
+      <label>認證需求</label>
+      <select id="m-cert"><option value="">不限</option><option value="EU">EU 認定</option><option value="HACCP">HACCP</option><option value="超低溫">超低溫冷鏈</option></select>
+      <button class="btn" style="margin-top:16px;width:100%" onclick="runMatch()">🤖 執行 AI 媒合</button>
+      <div class="note">分數＝品項契合 40% ＋ 市場覆蓋 30% ＋ 認證 20% ＋ 市場現況 10%。</div>
+    </div>
+    <div id="match-results"></div>
+  </div>
+</section>
+
+<!-- ===================== TOOLS ===================== -->
+<section class="view" id="view-tools">
+  <h2 class="section">🧰 出口工具箱</h2>
+  <p class="lead">三大自動化工具：法規就緒自動檢核、到岸成本(FOB→CIF)試算、出口文件草稿產生。</p>
+  <div class="subtabs" id="tool-subtabs">
+    <button class="on" data-t="check">⚖️ 法規檢核</button>
+    <button data-t="cost">🧮 成本試算</button>
+    <button data-t="doc">📄 文件產生</button>
+  </div>
+
+  <div id="tool-check" class="tool-pane">
+    <div class="tool-grid">
+      <div class="card form-card">
+        <label>品項</label><select id="c-prod"></select>
+        <label>目標市場</label><select id="c-market"></select>
+        <button class="btn" style="margin-top:16px;width:100%" onclick="runCheck()">產生就緒檢查表</button>
+      </div>
+      <div class="card panel" id="check-out"><p style="color:var(--muted)">選擇品項與市場後，AI 會列出必備證明、就緒分數與待辦項目。</p></div>
+    </div>
+  </div>
+
+  <div id="tool-cost" class="tool-pane" style="display:none">
+    <div class="tool-grid">
+      <div class="card form-card">
+        <label>FOB 單價（日圓 / kg）</label><input id="x-fob" type="number" value="2800" />
+        <label>數量（kg）</label><input id="x-qty" type="number" value="1000" />
+        <label>國際運費（日圓 / kg）</label><input id="x-freight" type="number" value="180" />
+        <label>保險費率（%）</label><input id="x-ins" type="number" value="0.3" step="0.1" />
+        <label>進口關稅率（%）</label><input id="x-tariff" type="number" value="5" />
+        <label>目標毛利率（%）</label><input id="x-margin" type="number" value="25" />
+        <button class="btn" style="margin-top:16px;width:100%" onclick="runCost()">試算到岸價與報價</button>
+      </div>
+      <div class="card panel" id="cost-out"><p style="color:var(--muted)">輸入參數後計算 CIF 到岸成本與建議售價。</p></div>
+    </div>
+  </div>
+
+  <div id="tool-doc" class="tool-pane" style="display:none">
+    <div class="tool-grid">
+      <div class="card form-card">
+        <label>文件類型</label>
+        <select id="d-type"><option value="checklist">出口文件檢查清單</option><option value="invoice">商業發票 Commercial Invoice</option><option value="packing">裝箱單 Packing List</option></select>
+        <label>出口商</label><input id="d-seller" value="（日本供應商名稱）" />
+        <label>買方</label><input id="d-buyer" value="（海外買家名稱）" />
+        <label>品項</label><select id="d-prod"></select>
+        <label>市場</label><select id="d-market"></select>
+        <label>數量(kg)</label><input id="d-qty" type="number" value="1000" />
+        <button class="btn" style="margin-top:16px;width:100%" onclick="runDoc()">產生文件草稿</button>
+        <button class="btn ghost" style="margin-top:8px;width:100%" onclick="copyDoc()">複製內容</button>
+      </div>
+      <div class="card panel"><div class="doc-out" id="doc-out">選擇文件類型後產生草稿…</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PIPELINE ===================== -->
+<section class="view" id="view-pipe">
+  <h2 class="section">📊 商談管線 CRM</h2>
+  <p class="lead">看板式追蹤每筆出口商談的進度。資料儲存於本機，可新增商談並逐階段推進。</p>
+  <div class="card form-card" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:16px">
+    <div><label>商談名稱 / 買家</label><input id="p-name" placeholder="例如：越南 ABC 水產 - 干貝" /></div>
+    <div><label>品項</label><select id="p-prod"></select></div>
+    <div><label>市場</label><select id="p-market"></select></div>
+    <button class="btn" onclick="addDeal()">＋ 新增商談</button>
+  </div>
+  <div class="pipe-board" id="pipe-board"></div>
+</section>
+
+<!-- ===================== LEARNING ===================== -->
+<section class="view" id="view-learn">
+  <h2 class="section">🧠 Agent 學習中心</h2>
+  <p class="lead">AI Agent 會從市場觀察、商談結果與你的教學中持續累積知識，越用越聰明。下方可直接「教」Agent 新事實，之後對話即可引用。</p>
+  <div class="learn-stats" id="learn-stats"></div>
+  <div class="two" style="grid-template-columns:1.3fr 1fr">
+    <div class="card panel">
+      <h3>知識庫（Agent 已學到的事實）</h3>
+      <div id="know-list" style="max-height:340px;overflow:auto"></div>
+      <div style="display:flex;gap:9px;margin-top:14px">
+        <input id="teach-in" placeholder="教 Agent 一條新事實（例如：泰國日料通路偏好急凍鰤魚片）" style="flex:1;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13.5px;outline:none" />
+        <button class="btn" onclick="teach()">教給 Agent</button>
+      </div>
+    </div>
+    <div class="card panel">
+      <h3>能力成熟度藍圖</h3>
+      <div class="cap-row"><span class="nm">供應商媒合</span><span class="track"><span class="fill" style="width:88%"></span></span><span class="pct">88% 營運</span></div>
+      <div class="cap-row"><span class="nm">法規自動檢核</span><span class="track"><span class="fill" style="width:80%"></span></span><span class="pct">80% 營運</span></div>
+      <div class="cap-row"><span class="nm">到岸成本試算</span><span class="track"><span class="fill" style="width:78%"></span></span><span class="pct">78% 營運</span></div>
+      <div class="cap-row"><span class="nm">文件自動產生</span><span class="track"><span class="fill" style="width:62%"></span></span><span class="pct">62% 測試</span></div>
+      <div class="cap-row"><span class="nm">市場動態監控</span><span class="track"><span class="fill" style="width:55%"></span></span><span class="pct">55% 排程中</span></div>
+      <div class="cap-row"><span class="nm">自動報價談判</span><span class="track"><span class="fill" style="width:30%"></span></span><span class="pct">30% 研發</span></div>
+      <div class="cap-row"><span class="nm">多語在地化</span><span class="track"><span class="fill" style="width:40%"></span></span><span class="pct">40% 研發</span></div>
+      <div class="note">藍圖將隨資料量、商談筆數與教學累積自動提升成熟度。</div>
+    </div>
+  </div>
+</section>
+
+<div class="src" id="sources"></div>
+<footer>日本海產出口 AI 統籌中心 · 資料查證至 2026/06 · 本工具為決策輔助，實際出口請以各國主管機關與 JETRO 最新公告為準。</footer>
+</main>
+
+<script>
+/* ====================== DATA ====================== */
+const SUP=[
+ {n:"Maruha Nichiro マルハニチロ",cat:1,hq:"東京",prod:["干貝","鯖魚","秋刀魚","加工品"],cert:["HACCP","全球物流"],mk:["全球","亞洲"],d:"日本最大水產企業。出口冷凍干貝、鯖魚、秋刀魚及各類加工品，供應全球批發與零售通路。"},
+ {n:"NISSUI ニッスイ",cat:1,hq:"東京",prod:["黑鮪魚","鮭魚","鰤魚","裹粉海鮮"],cert:["HACCP","遠洋漁隊","養殖"],mk:["全球","亞洲"],d:"原名日本水產。強大遠洋漁隊與養殖技術，主打黑鮪魚、鮭魚、鰤魚及高品質冷凍裹粉海鮮。"},
+ {n:"KYOKUYO 極洋",cat:1,hq:"東京",prod:["壽司料","冷凍魚片","蟹肉棒","加工品"],cert:["HACCP","餐飲通路"],mk:["全球","亞洲"],d:"專精壽司料(Sushi Toppings)、冷凍魚片、蟹肉棒及各類加工海鮮，全球餐飲通路重要供應商。"},
+ {n:"Nichirei Fresh ニチレイフレッシュ",cat:1,hq:"東京",prod:["生食級海鮮","精緻水產"],cert:["超低溫","HACCP"],mk:["全球","亞洲"],d:"日冷集團水產板塊。嚴格超低溫冷鏈，主力出口高品質生食級海鮮與精緻水產食材。"},
+ {n:"JF Zengyoren 全国漁業協同組合連合会",cat:2,hq:"東京",prod:["秋刀魚","魷魚","鯖魚","季節性水產"],cert:["產地直供"],mk:["亞洲","全球"],d:"日本全國漁聯，代表各地在地漁民。採購全日本各海域季節性水產原料的大型窗口。"},
+ {n:"HOKUREN 北海道漁連",cat:2,hq:"北海道",prod:["干貝","昆布","鮭魚","鮭魚卵","毛蟹"],cert:["生食級","產地直供"],mk:["亞洲","美國"],d:"採購北海道生食級干貝(Hotate)、昆布、鮭魚、鮭魚卵(Ikura)及毛蟹首選窗口，產量與出口量居日本之冠。"},
+ {n:"東町漁業協同組合（鰤王）",cat:2,hq:"鹿兒島",prod:["鰤魚"],cert:["HACCP","EU","產地直供"],mk:["美國","亞洲","歐洲"],d:"日本養殖鰤魚龍頭漁聯。品牌「鰤王」國際知名（美/中/台/東南亞），具完善 HACCP 出口認證，2001 年起取得對 EU 認定。"},
+ {n:"True World Japan, Inc.",cat:3,hq:"東京",prod:["黑鮪魚","活體海鮮","鰤魚","干貝"],cert:["全球空運","HACCP"],mk:["全球","亞洲","美國"],d:"極強全球空運物流網，專供海外高檔日料餐廳與超市。"},
+ {n:"Nishimoto Wismettac Group",cat:3,hq:"東京",prod:["干貝","鰤魚片","日料食材"],cert:["生食級","HACCP"],mk:["全球","亞洲"],d:"跨國食品貿易商，海外通路成熟，主打高端生食級水產。"},
+ {n:"森松水産 Morimatsu Suisan",cat:3,hq:"愛媛縣",prod:["活締鮮魚","鰤魚","真鯛"],cert:["活締","保鮮技術"],mk:["亞洲","歐洲"],d:"精緻養殖魚出口先驅，高科技保鮮，活魚現宰(活締)後急速空運外銷。"},
+ {n:"大水 Daisui Co., Ltd.",cat:3,hq:"大阪",prod:["綜合水產","拼箱"],cert:["中轉","多品項"],mk:["亞洲","全球"],d:"關西主要批發水產商，強大中轉與多品項拼箱出口能力。"},
+ {n:"三崎恵水産 Misaki Megumi",cat:3,hq:"神奈川縣",prod:["黑鮪魚"],cert:["超低溫","部位清肉"],mk:["亞洲","全球"],d:"超低溫(-60°C)天然黑鮪魚專家，三崎港出口，可依買家需求精細部位清肉(Loin/Fillet)加工。"},
+ {n:"黒瀬水産 Kurose Fishery",cat:3,hq:"宮崎縣",prod:["鰤魚"],cert:["活締","急速冷凍"],mk:["亞洲","全球","美國"],d:"Nissui 子公司，活締「黑瀨鰤魚」，頂級養殖鰤魚出口，急速冷凍與去骨加工受國際買家青睞。"},
+ /* --- 擴充：水產大手・綜合（查證 2026/06） --- */
+ {n:"横浜冷凍 ヨコレイ Yokorei",cat:1,hq:"東京・横浜",prod:["冷凍水產","干貝","鮪魚","物流冷鏈"],cert:["超低溫","冷鏈物流"],mk:["全球","亞洲"],d:"日本最大水產冷凍物流商之一，營運全國超低溫倉儲並經營水產貿易，提供出口冷鏈一站式服務。"},
+ {n:"ニチモウ Nichimo",cat:1,hq:"東京",prod:["綜合水產","加工品","養殖資材"],cert:["HACCP"],mk:["亞洲","全球"],d:"老牌水產綜合企業，橫跨漁撈資材、養殖、食品加工與貿易。"},
+ {n:"マリンフーズ Marine Foods",cat:1,hq:"東京",prod:["生食級海鮮","壽司料","加工品"],cert:["HACCP","生食級"],mk:["亞洲","全球"],d:"NH Foods（日本火腿）集團水產事業，供應生食級壽司料與加工海鮮。"},
+ {n:"大冷 Dairei",cat:1,hq:"東京",prod:["冷凍魚片","加工品"],cert:["HACCP","急速冷凍"],mk:["亞洲","全球"],d:"專長無添加冷凍魚片與餐飲用水產半成品，餐飲通路供應商。"},
+ {n:"はごろもフーズ Hagoromo Foods",cat:1,hq:"静岡",prod:["鮪魚罐頭","加工品"],cert:["HACCP"],mk:["亞洲","全球"],d:"知名鮪魚罐頭品牌（シーチキン），常溫水產加工品出口。"},
+ {n:"宝幸 Hoko",cat:1,hq:"東京",prod:["鮭魚","鯖魚","罐頭","加工品"],cert:["HACCP"],mk:["亞洲"],d:"水產罐頭與冷凍加工品製造商，主力鮭魚、鯖魚製品。"},
+ {n:"一正蒲鉾 Ichimasa",cat:1,hq:"新潟",prod:["蟹肉棒","魚漿製品","加工品"],cert:["HACCP"],mk:["亞洲","全球"],d:"魚漿製品(かまぼこ／仿蟹肉)大廠，加工水產外銷。"},
+ /* --- 擴充：各都道府縣漁聯・產地直供 --- */
+ {n:"青森県漁業協同組合連合会",cat:2,hq:"青森",prod:["干貝","陸奧灣ホタテ"],cert:["產地直供","生食級"],mk:["亞洲","美國"],d:"陸奧灣干貝主產地漁聯，供應生食級ホタテ，產量僅次北海道。"},
+ {n:"宮城県漁業協同組合",cat:2,hq:"宮城",prod:["牡蠣","銀鮭","昆布","海鞘"],cert:["產地直供"],mk:["亞洲"],d:"三陸產地漁協，牡蠣、銀鮭、海帶芽等養殖與天然水產。"},
+ {n:"JF愛媛漁連",cat:2,hq:"愛媛",prod:["真鯛","鰤魚","養殖魚"],cert:["產地直供","養殖"],mk:["亞洲","美國"],d:"日本養殖真鯛產量第一，供應生食級真鯛與鰤魚。"},
+ {n:"JF長崎漁連",cat:2,hq:"長崎",prod:["鰤魚","竹筴魚","鯖魚","養殖魚"],cert:["產地直供"],mk:["亞洲"],d:"西日本重要漁業縣，養殖鰤魚與近海漁獲(竹筴魚／鯖魚)。"},
+ {n:"JF大分（佐賀關）",cat:2,hq:"大分",prod:["關竹筴魚","關鯖魚","真鯛"],cert:["產地直供","品牌"],mk:["亞洲"],d:"知名品牌「關あじ・關さば」一本釣產地，高鮮度高單價。"},
+ {n:"JF鹿児島漁連",cat:2,hq:"鹿児島",prod:["鰤魚","間八","鰹魚"],cert:["產地直供","養殖"],mk:["亞洲","美國"],d:"南九州養殖鰤魚與間八(kanpachi)主產地漁聯。"},
+ /* --- 擴充：專業貿易商・加工 --- */
+ {n:"GOT Japan Co., Ltd.",cat:3,hq:"東京",prod:["壽司料","干貝","黑鮪魚"],cert:["生食級","HACCP"],mk:["美國","亞洲"],d:"專營壽司料(scallop／tuna 等)，主要外銷美國並批發至多個城市通路。"},
+ {n:"Koyo Trading Ltd. 光洋",cat:3,hq:"日本",prod:["黑鮪魚","干貝","生鮮冷凍"],cert:["生食級"],mk:["亞洲","全球"],d:"生鮮與冷凍黑鮪魚、干貝等多品項出口貿易商。"},
+ {n:"Ocean Boy Co., Ltd.",cat:3,hq:"福岡",prod:["黑鮪魚","鰤魚","近海鮮魚"],cert:["養殖","生食級"],mk:["亞洲","全球"],d:"養殖黑鮪魚與鰤魚出口，搭配九州在地多樣鮮魚。"},
+ {n:"Ocean Trading Co., Ltd.",cat:3,hq:"日本",prod:["綜合水產","加工品"],cert:["HACCP"],mk:["亞洲","全球"],d:"綜合食品貿易商，水產出口與海外採購並行。"}
+];
+const CATN={1:"綜合型水產巨頭",2:"產地直供漁聯",3:"專業貿易商"};
+const CATC={1:"c1",2:"c2",3:"c3"};
+
+const COUNTRIES=[
+ {id:"cn",f:"🇨🇳",n:"中國",st:"stop",stl:"暫停中",
+  status:["stop","目前暫停：中國於 2025/11/19 因外交因素再度暫停日本水產進口。即便 2025/06 部分解禁（排除福島等 10 都縣），設施再登錄 697 件僅 3 件通過，實務通關仍受阻。"],
+  req:[["衛生證明書","Health Certificate"],["放射性物質檢驗證明","Radioactivity Test"],["產地證明書","Certificate of Origin"],["中國設施登錄","Facility Registration"]],
+  steps:[["確認產地是否在限制清單外","排除福島、群馬、栃木、茨城、宮城、新潟、長野、埼玉、東京、千葉等 10 都縣。"],
+   ["向中國海關總署(GACC)申請設施再登錄","需重新登錄；目前審核極慢（697 件中僅 3 件通過）。","系統：CIFER / 單一窗口"],
+   ["備齊三證","衛生證明 + 放射性檢驗證明 + 產地證明，缺一不可。"],
+   ["持續追蹤政策","因屬政治敏感，建議同步準備替代市場（越南/台灣/東南亞）。"]]},
+ {id:"tw",f:"🇹🇼",n:"台灣",st:"open",stl:"開放",
+  status:["open","開放：台灣為日本水產第 3 大市場，2024 年干貝進口 ¥121 億。需符合輻射檢測與產地標示規定。"],
+  req:[["輸入查驗","食藥署 TFDA"],["產地證明","Certificate of Origin"],["輻射檢測報告","視品項"],["業者登錄","輸入業者"]],
+  steps:[["確認 HS 編碼與輸入規定","查詢台灣食藥署(TFDA)邊境查驗條件。"],
+   ["日本端取得產地證明","透過地方農政局申請產地/必要證明。"],
+   ["安排輻射檢測（如需）","部分品項/產地需附檢測報告。"],
+   ["台灣輸入報驗","由台灣輸入業者向 TFDA 申報邊境查驗，抽驗合格後放行。"]]},
+ {id:"hk",f:"🇭🇰",n:"香港",st:"open",stl:"開放",
+  status:["open","開放：香港為日本食品第 2 大市場(2025 ¥2,228 億)。日本水產自由貿易程度高，惟仍對部分都縣產品有食安要求。"],
+  req:[["產地證明","Certificate of Origin"],["放射性相關文件","視都縣"],["食安標示","CFS 規定"]],
+  steps:[["確認食安中心(CFS)對產地的要求","部分都縣水產需附輻射證明。"],
+   ["備齊產地/必要證明","地方農政局申請。"],
+   ["空運/海運報關","香港進口程序相對簡便，適合高鮮度空運。"]]},
+ {id:"vn",f:"🇻🇳",n:"越南",st:"open",stl:"開放・熱門",
+  status:["open","開放且高速成長：越南成為干貝去殼/再加工樞紐，承接原銷中國需求。對越干貝 2023 ¥8 億 → 2024 ¥106 億(約 13 倍)。"],
+  req:[["衛生證明書","Health Certificate"],["產地證明","Certificate of Origin"],["NAFIQPM 要求","越南主管機關"]],
+  steps:[["鎖定越南加工夥伴","JETRO 已公開 16 家有意承接干貝加工的越南企業名單可參考。"],
+   ["日本端取得衛生/產地證明","透過地方農政局與輸出本部流程申辦。"],
+   ["符合越南進口檢疫要求","配合越南 NAFIQPM 水產食安規定。"],
+   ["建立再出口路徑","越南加工後可再外銷美國/歐盟等地。"]]},
+ {id:"th",f:"🇹🇭",n:"泰國",st:"open",stl:"開放・成長",
+  status:["open","開放且成長：中國禁令後對泰國等東南亞出口增加，日料與零售通路擴張中。"],
+  req:[["衛生證明書","Health Certificate"],["產地證明","Certificate of Origin"],["Thai FDA 要求",""]],
+  steps:[["確認 Thai FDA 進口規定",""],["日本端備齊衛生/產地證明",""],["泰國端報關與檢驗",""]]},
+ {id:"kr",f:"🇰🇷",n:"韓國",st:"cond",stl:"有條件",
+  status:["cond","有條件：韓國對部分都縣水產維持進口限制，且對秋刀魚等要求附漁獲證明書(Catch Certificate)。"],
+  req:[["漁獲證明書","秋刀魚等"],["產地證明","Certificate of Origin"],["放射性檢驗","視品項/產地"]],
+  steps:[["確認品項是否需漁獲證明","韓國向さんま(秋刀魚)等要求漁獲證明書。","申請前先電洽水產廳加工流通課 03-3502-4190"],
+   ["確認產地限制","部分福島周邊都縣水產仍受限。"],
+   ["備齊放射性/產地文件",""],["韓國端報關檢驗",""]]},
+ {id:"sg",f:"🇸🇬",n:"新加坡",st:"open",stl:"開放",
+  status:["open","開放：新加坡為高端日料重要市場，SFA 對進口水產有衛生與來源要求。"],
+  req:[["衛生證明書","Health Certificate"],["SFA 進口許可",""],["產地證明",""]],
+  steps:[["向 SFA 確認進口商許可與品項規定",""],["日本端備齊衛生/產地證明",""],["新加坡端報關",""]]},
+ {id:"id",f:"🇮🇩",n:"印尼",st:"cond",stl:"有條件",
+  status:["cond","有條件：印尼進口水產需符合 BPOM/檢疫要求，部分品項需事前核准。"],
+  req:[["衛生證明書",""],["進口許可","BKIPM/檢疫"],["產地證明",""]],
+  steps:[["確認印尼水產檢疫(BKIPM)要求",""],["取得進口許可與證明",""],["報關檢驗",""]]}
+];
+
+const CASES=[
+ {n:"鰤王（鹿兒島・東町漁協）",who:"養殖鰤魚品牌化 × 多市場",s:[["¥284億","2025 鰤魚出口額（全日本）"],["2001","取得對 EU 認定"]],
+  d:"以「鰤王」品牌切入美、中、台、東南亞與歐洲。透過 HACCP 與 EU 認定打開高端通路，是日本養殖魚品牌化外銷的標竿。",
+  t:"2001 EU 認定 → 美/亞高端餐飲 → 持續多市場布局",award:"品牌化"},
+ {n:"北海道干貝 × 越南加工樞紐",who:"市場多角化 × 加工外移",s:[["¥106億","2024 對越南干貝(↑13x)"],["+30.4%","2025 干貝總出口"]],
+  d:"中國禁令後，業界將原本輸往中國去殼/再加工的干貝轉向越南，建立加工樞紐後再外銷美歐。JETRO 已盤點 16 家越南加工企業協助對接。",
+  t:"2023 ¥8億 → 2024 ¥106億 → 2025 持續擴大",award:"多角化"},
+ {n:"美國干貝需求轉單",who:"供給缺口 × 生食級優勢",s:[["¥191億","2024 對美干貝（最大市場）"],["No.1","美國為干貝第一大市場"]],
+  d:"美國本土干貝減產造成供給缺口，日本生食級(Hotate)需求升高，成為中國禁令期間最重要的替代市場。",
+  t:"美國減產 → 日本生食級補位 → 穩居第一",award:"替代市場"},
+ {n:"2025 出口創高 × 全品類",who:"國家級多角化策略",s:[["¥1.70兆","2025 農林水產食品出口"],["13年","連續創新高"]],
+  d:"在中國禁令衝擊下，日本透過香港、台灣、美國、東南亞多角化布局，2025 年農林水產・食品出口仍創歷史新高。",
+  t:"分散市場 → 抵銷中國缺口 → 整體創高",award:"國家策略"}
+];
+
+const SOURCES=[
+ ["水產廳：水產物輸出に係る手続","https://www.jfa.maff.go.jp/j/kakou/export/exporttetsuzuki.html"],
+ ["農林水產省：輸出に関する手続き・制度","https://www.maff.go.jp/j/shokusan/export/e_process/index.html"],
+ ["JETRO 農林水產物・食品輸出支援ポータル","https://www.jetro.go.jp/agriportal/"],
+ ["JETRO：2025 年輸出額過去最高 1.7 兆円","https://www.jetro.go.jp/biznews/2026/02/f4ba9ae10c6b7b72.html"],
+ ["JETRO：越南ホタテ加工の現状（16 社調査）","https://www.jetro.go.jp/news/releases/2025/5aeb24ee2504c44c.html"],
+ ["水產廳：對 EU 輸出水產食品施設認定","https://www.jfa.maff.go.jp/j/kakou/100801.html"],
+ ["東町漁協・鰤王 海外輸出","https://www.azuma.or.jp/export/"],
+ ["The Japan Times：Japan resumes scallop exports to China (2025/11/07)","https://www.japantimes.co.jp/business/2025/11/07/scallop-exports-china/"],
+ ["Japan Times：China to reimpose ban over Taiwan (2025/11/19)","https://www.japantimes.co.jp/news/2025/11/19/japan/politics/japan-china-relations-marine-products/"],
+ ["The Diplomat：Japan's farm & food exports hit new high (2026/02)","https://thediplomat.com/2026/02/japans-farm-and-food-exports-hit-new-high-as-trade-patterns-shift"]
+];
+
+/* ===== LIVE_UPDATES：每日排程自動維護此陣列（請勿移動標記） ===== */
+/* LIVE_UPDATES_START */
+const LIVE_UPDATES=[
+ {d:"2026-06-22",tag:"法規",txt:"中國維持暫停日本水產進口（自 2025/11/19，涉台外交因素）；設施再登錄 697 件僅 3 件通過。主力市場維持越南、台灣、美國、東南亞。"},
+ {d:"2026-06-22",tag:"市場",txt:"干貝對越南加工樞紐需求持續強勁；美國因本土減產維持高需求。"}
+];
+/* LIVE_UPDATES_END */
+function renderLive(){
+  const el=document.getElementById('live-feed');if(!el)return;
+  const tagc={'法規':'b-gold','市場':'b-green','物流':'b-blue','風險':'b-red','機會':'b-purple'};
+  el.innerHTML=LIVE_UPDATES.slice(0,8).map(u=>
+   `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px">
+     <span style="flex:none;color:var(--muted);font-size:12px;width:82px">${u.d}</span>
+     <span class="badge ${tagc[u.tag]||'b-gray'}" style="flex:none;height:fit-content">${u.tag}</span>
+     <span>${u.txt}</span></div>`).join('');
+}
+
+/* ====================== NAV ====================== */
+function go(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.getElementById('tabs').addEventListener('click',e=>{if(e.target.dataset.v)go(e.target.dataset.v)});
+
+/* ====================== SUPPLIERS ====================== */
+(function initProd(){
+  const set=new Set();SUP.forEach(s=>s.prod.forEach(p=>set.add(p)));
+  const sel=document.getElementById('f-prod');
+  [...set].sort().forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o)});
+})();
+function renderSup(){
+  const c=document.getElementById('f-cat').value,p=document.getElementById('f-prod').value,
+    ce=document.getElementById('f-cert').value,kw=document.getElementById('f-kw').value.trim().toLowerCase();
+  const g=document.getElementById('supgrid');g.innerHTML='';
+  const scEl=document.getElementById('sup-count');if(scEl)scEl.textContent=SUP.length;
+  const list=SUP.filter(s=>(!c||s.cat==c)&&(!p||s.prod.includes(p))&&
+    (!ce||s.cert.some(x=>x.includes(ce)))&&(!kw||(s.n+s.hq+s.d).toLowerCase().includes(kw)));
+  if(!list.length){g.innerHTML='<p style="color:var(--muted)">沒有符合條件的供應商，請放寬篩選。</p>';return;}
+  list.forEach(s=>{
+    const el=document.createElement('div');el.className='card sup';
+    el.innerHTML=`<div class="top"><div><h3>${s.n}</h3>
+      <div class="jp">總部・${s.hq}</div></div><span class="cat-pill ${CATC[s.cat]}">${CATN[s.cat]}</span></div>
+      <div class="meta"><b>主力品項：</b>${s.prod.join('、')}</div>
+      <div class="tags">${s.cert.map(x=>`<span class="badge b-blue">${x}</span>`).join('')}
+        ${s.mk.map(x=>`<span class="badge b-gray">${x}</span>`).join('')}</div>
+      <div class="desc">${s.d}</div>`;
+    g.appendChild(el);
+  });
+}
+renderSup();
+renderLive();
+
+/* ====================== PROCESS WIZARD ====================== */
+function renderCountries(){
+  const c=document.getElementById('countrylist');c.innerHTML='';
+  COUNTRIES.forEach((co,i)=>{
+    const b=document.createElement('button');b.dataset.id=co.id;if(i===1)b.classList.add('active');
+    b.innerHTML=`<span class="flag">${co.f}</span>${co.n}<span class="st stp-${co.st==='open'?'open':co.st==='cond'?'cond':'stop'}"></span>`;
+    b.onclick=()=>{document.querySelectorAll('#countrylist button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');renderProc(co.id)};
+    c.appendChild(b);
+  });
+  renderProc('tw');
+}
+function renderProc(id){
+  const co=COUNTRIES.find(x=>x.id===id);const b=document.getElementById('procbody');
+  const stc=co.status[0];
+  b.innerHTML=`<h3>${co.f} ${co.n} 出口流程　<span class="badge ${stc==='open'?'b-green':stc==='cond'?'b-gold':'b-red'}">${co.stl}</span></h3>
+   <div class="stat ${stc}">${co.status[1]}</div>
+   <h3 style="font-size:14px">必備證明 / 文件</h3>
+   <div class="req-grid">${co.req.map(r=>`<div class="req"><b>${r[0]}</b>${r[1]||''}</div>`).join('')}</div>
+   <h3 style="font-size:14px">線上申辦步驟</h3>
+   <ol class="steps">${co.steps.map(s=>`<li><h4>${s[0]}</h4><p>${s[1]}</p>${s[2]?`<div class="doc">🔗 ${s[2]}</div>`:''}</li>`).join('')}</ol>
+   <div class="note">共通流程：日本水產出口統一由「農林水產物・食品輸出本部」統籌；放射性物質檢驗證明與產地證明自 2020/4 起於各地方農政局申請發行。EU/美國另需取得對應 HACCP 施設認定。</div>`;
+}
+renderCountries();
+
+/* ====================== OBSERVATION ====================== */
+const OBS_KEY='seaexport_obs_v1';
+(function initMk(){
+  const sel=document.getElementById('o-market');
+  ['中國','台灣','香港','越南','泰國','韓國','新加坡','印尼','美國','歐盟'].forEach(m=>{
+    const o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o)});
+})();
+function loadObs(){try{return JSON.parse(localStorage.getItem(OBS_KEY))||[]}catch(e){return window._obs||[]}}
+function saveObs(a){try{localStorage.setItem(OBS_KEY,JSON.stringify(a))}catch(e){window._obs=a}}
+function seedObs(){
+  let a=loadObs();
+  if(a.length)return;
+  a=[
+   {d:"2026-06-15",m:"越南",t:"需求",i:"高",n:"干貝去殼加工需求持續強勁，當地 16 家加工廠產能吃緊，建議提前鎖定夥伴。"},
+   {d:"2026-06-10",m:"中國",t:"法規",i:"高",n:"設施再登錄 697 件僅 3 件通過，短期難恢復，維持替代市場為主。"},
+   {d:"2026-06-05",m:"美國",t:"價格",i:"中",n:"本土干貝減產，生食級到岸價維持高檔，需求穩定。"}
+  ];
+  saveObs(a);
+}
+function renderObs(){
+  const a=loadObs();const tb=document.getElementById('obsbody');tb.innerHTML='';
+  if(!a.length){tb.innerHTML='<tr><td colspan="6" style="color:var(--muted)">尚無記錄，請於上方新增。</td></tr>';return;}
+  a.forEach((o,idx)=>{
+    const col=o.i==='高'?'b-red':o.i==='中'?'b-gold':'b-gray';
+    const tt={'價格':'b-blue','需求':'b-green','法規':'b-purple','競品':'b-gold','物流':'b-gray'}[o.t]||'b-gray';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${o.d}</td><td>${o.m}</td><td><span class="tag-s ${tt}">${o.t}</span></td>
+      <td><span class="tag-s ${col}">${o.i}</span></td><td>${o.n}</td>
+      <td><a href="#" onclick="delObs(${idx});return false" style="color:var(--bad);text-decoration:none">刪除</a></td>`;
+    tb.appendChild(tr);
+  });
+}
+function addObs(){
+  const n=document.getElementById('o-note').value.trim();if(!n){alert('請輸入觀察內容');return;}
+  const a=loadObs();
+  a.unshift({d:new Date().toISOString().slice(0,10),m:document.getElementById('o-market').value,
+    t:document.getElementById('o-type').value,i:document.getElementById('o-impact').value,n:n});
+  saveObs(a);document.getElementById('o-note').value='';renderObs();
+}
+function delObs(i){const a=loadObs();a.splice(i,1);saveObs(a);renderObs();}
+function exportObs(){
+  const a=loadObs();let csv='﻿日期,市場,類型,影響,觀察內容\n';
+  a.forEach(o=>csv+=`${o.d},${o.m},${o.t},${o.i},"${o.n.replace(/"/g,'""')}"\n`);
+  const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);
+  const a2=document.createElement('a');a2.href=u;a2.download='市場觀察記錄.csv';a2.click();URL.revokeObjectURL(u);
+}
+seedObs();renderObs();
+
+/* ====================== CASES ====================== */
+(function(){const c=document.getElementById('caselist');
+  CASES.forEach(x=>{const el=document.createElement('div');el.className='card case';
+    el.innerHTML=`<div class="ribbon-c">${x.award}</div><h3>${x.n}</h3><div class="who">${x.who}</div>
+      <div class="stat-row">${x.s.map(s=>`<div class="s"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('')}</div>
+      <p>${x.d}</p><div class="timeline">📌 ${x.t}</div>`;
+    c.appendChild(el)});
+})();
+
+/* ====================== SOURCES ====================== */
+(function(){document.getElementById('sources').innerHTML='<b>資料來源（查證至 2026/06）：</b><br>'+
+  SOURCES.map(s=>`<a href="${s[1]}" target="_blank" rel="noopener">${s[0]}</a>`).join(' ・ ');})();
+
+/* ====================== AI AGENT ====================== */
+const CHIPS=["干貝出口越南要怎麼做？","黑鮪魚要找哪家供應商？","中國現在能出口嗎？","EU HACCP 認定流程","鰤魚出口美國推薦","香港需要哪些證明？"];
+(function(){const c=document.getElementById('chips');CHIPS.forEach(t=>{const b=document.createElement('span');b.className='chip';b.textContent=t;b.onclick=()=>quickAsk(t);c.appendChild(b)})})();
+
+function addMsg(t,who){
+  const log=document.getElementById('chatlog');const m=document.createElement('div');
+  m.className='msg '+who;m.innerHTML=t;log.appendChild(m);log.scrollTop=log.scrollHeight;return m;
+}
+function quickAsk(t){document.getElementById('chatin').value=t;go('agent');sendChat();}
+
+function recommendSuppliers(prod,market){
+  let list=SUP.filter(s=>!prod||s.prod.some(p=>p.includes(prod)));
+  if(market)list=list.sort((a,b)=>(b.mk.some(m=>market.includes(m)||m.includes(market))?1:0)-(a.mk.some(m=>market.includes(m)||m.includes(market))?1:0));
+  return list.slice(0,3);
+}
+function answer(q){
+  const t=q.toLowerCase();
+  // detect product
+  let prod=null;
+  for(const p of ["干貝","黑鮪魚","鮪魚","鰤魚","鮭魚","秋刀魚","蟹","真鯛","鯖魚","壽司"]) if(q.includes(p)){prod=p.replace("鮪魚","黑鮪魚");break;}
+  // detect market
+  let mk=null,co=null;
+  const mmap={"越南":"vn","台灣":"tw","台湾":"tw","香港":"hk","中國":"cn","中国":"cn","泰國":"th","泰国":"th","韓國":"kr","韩国":"kr","新加坡":"sg","印尼":"id","美國":"us","美国":"us","東南亞":"th","欧盟":"eu","EU":"eu"};
+  for(const k in mmap)if(q.includes(k)){mk=k;co=COUNTRIES.find(c=>c.id===mmap[k]);break;}
+
+  // China status
+  if((q.includes("中國")||q.includes("中国"))&&(q.includes("能")||q.includes("可以")||q.includes("現況")||q.includes("狀態")||q.includes("禁"))){
+    return `<b>🇨🇳 中國市場現況（2026/06）</b>\n目前<b>暫停中</b>。時間軸：\n• 2023/08 福島處理水後全面禁止\n• 2025/06 部分解禁（排除福島等 10 都縣）\n• 2025/11/07 北海道干貝 6.6 噸首批恢復\n• 2025/11/19 因涉台言論<b>再度暫停</b>\n此外設施再登錄 697 件僅 3 件通過，通關瓶頸嚴重。\n\n👉 建議：以<b>越南、台灣、美國、東南亞</b>多角化為主，中國作為機會市場觀望。要看替代市場流程嗎？`;
+  }
+  // HACCP / EU
+  if(q.includes("HACCP")||q.includes("haccp")||(q.includes("EU")&&q.includes("認"))||q.includes("施設認定")||q.includes("認定流程")){
+    return `<b>⚖️ HACCP 施設認定流程</b>\n<b>對 EU（兩階段）：</b>\n1️⃣ 事前審查：向事前審查機關申請 → 書類審查＋現地調查 → 通知改善點\n2️⃣ 水產廳認定審查：改善完成後向水產廳申請 → 書類＋現地調查 → 符合即認定\n認定施設名單可於農林水產省/地方厚生局網站查詢。\n\n<b>對美國：</b>需依 FDA 方式建立 HACCP 計畫，取得「水產食品加工施設 HACCP 認定」。\n\n名單具 EU/HACCP 認證的供應商：鰤王(東町漁協)、Maruha Nichiro、NISSUI、Nichirei Fresh。`;
+  }
+  // product + market recommendation
+  if(prod){
+    const recs=recommendSuppliers(prod,mk);
+    let s=`<b>🤖 ${prod}${mk?` → ${mk}`:''} 建議</b>\n\n<b>推薦供應商：</b>\n`+
+      recs.map(r=>`• <b>${r.n.split(' ')[0]}</b>（${r.hq}）— ${r.cert.join('/')}`).join('\n');
+    if(co){
+      s+=`\n\n<b>${co.f}${co.n} 出口（${co.stl}）：</b>\n${co.status[1]}\n必備：${co.req.map(r=>r[0]).join('、')}。`;
+      s+=`\n\n要我展開 ${co.n} 的完整線上申辦步驟嗎？（點上方「出口法規流程」分頁）`;
+    } else {
+      s+=`\n\n告訴我目標市場（如越南/台灣/香港/美國），我可調出該國的證明與線上流程。`;
+    }
+    return s;
+  }
+  // market only
+  if(co){
+    return `<b>${co.f}${co.n} 出口（${co.stl}）</b>\n${co.status[1]}\n\n<b>必備證明：</b>${co.req.map(r=>r[0]).join('、')}\n<b>步驟概要：</b>\n`+
+      co.steps.map((st,i)=>`${i+1}. ${st[0]}`).join('\n')+`\n\n完整步驟與主管機關請見上方「出口法規流程」分頁。要我推薦適合此市場的供應商嗎？`;
+  }
+  // fallback
+  return `我是日本海產出口統籌 Agent，可以幫你：\n• <b>媒合供應商</b>：告訴我品項（干貝/黑鮪魚/鰤魚…）＋目標市場\n• <b>查出口流程</b>：問我某國（越南/台灣/香港/中國…）要哪些證明與步驟\n• <b>追市場動態</b>：例如「中國現在能出口嗎？」\n\n試試：「我要把干貝出口到越南，要找誰、要哪些證明？」`;
+}
+function sendChat(){
+  const inp=document.getElementById('chatin');const q=inp.value.trim();if(!q)return;
+  addMsg(q,'me');inp.value='';
+  const log=document.getElementById('chatlog');
+  const tp=document.createElement('div');tp.className='typing';tp.textContent='Agent 查詢中…';log.appendChild(tp);log.scrollTop=log.scrollHeight;
+  setTimeout(()=>{tp.remove();addMsg(answer(q),'ai')},600);
+}
+document.getElementById('chatin').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat()});
+addMsg(`你好！我是 <b>SeaExport Agent</b> 🐟\n我整合了日本四大水產巨頭、漁聯、專業貿易商與各亞洲市場的出口法規。\n\n你可以問我：品項 + 市場（例如「鰤魚出口美國推薦」）、某國出口要哪些證明，或最新禁令動態。下方有快速情境可直接點選。`,'ai');
+
+/* ====================== SHARED: products & markets ====================== */
+const ALLPROD=[...new Set(SUP.flatMap(s=>s.prod))].sort();
+function fillProd(id){const s=document.getElementById(id);if(!s)return;ALLPROD.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;s.appendChild(o)});}
+function fillMarket(id){const s=document.getElementById(id);if(!s)return;COUNTRIES.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.f+' '+c.n;s.appendChild(o)});}
+['m-prod','c-prod','d-prod','p-prod'].forEach(fillProd);
+['c-market','d-market','p-market'].forEach(fillMarket);
+const REGION_OF={us:'美國',cn:'亞洲',tw:'亞洲',hk:'亞洲',vn:'亞洲',th:'亞洲',kr:'亞洲',sg:'亞洲',id:'亞洲'};
+const STSCORE={open:100,cond:60,stop:20};
+
+/* ====================== MATCHING ====================== */
+let matchRole='buyer';
+document.getElementById('m-role').addEventListener('click',e=>{if(!e.target.dataset.r)return;
+  matchRole=e.target.dataset.r;document.querySelectorAll('#m-role button').forEach(b=>b.classList.toggle('on',b===e.target));});
+const PRODAFF={
+ "干貝":{vn:95,us:90,tw:85,th:72,hk:62,kr:66,sg:60,cn:42,id:55},
+ "黑鮪魚":{tw:90,hk:88,us:85,sg:82,th:62,vn:55,kr:60,cn:40,id:50},
+ "鰤魚":{us:92,th:80,vn:74,tw:82,hk:76,sg:80,kr:60,cn:40,id:58},
+ "鮭魚":{tw:78,hk:75,vn:70,us:72,th:68,kr:65,sg:70,cn:45,id:55},
+ "秋刀魚":{tw:80,kr:78,hk:70,vn:62,th:58,us:55,sg:55,cn:45,id:50},
+ "蟹":{hk:82,tw:80,us:72,sg:75,vn:60,th:60,kr:62,cn:45,id:50}
+};
+function affinity(prod,mk){const a=PRODAFF[prod];return a&&a[mk]!=null?a[mk]:62;}
+function ringColor(s){return s>=85?'#1b9e6f':s>=70?'#2f74d0':'#caa24a';}
+function runMatch(){
+  const prod=document.getElementById('m-prod').value,mk=document.getElementById('m-market').value,
+    cert=document.getElementById('m-cert').value,co=COUNTRIES.find(c=>c.id===mk);
+  const region=REGION_OF[mk],box=document.getElementById('match-results');
+  let html='';
+  if(matchRole==='buyer'){
+    const scored=SUP.map(s=>{
+      let sc=0,why=[];
+      if(s.prod.includes(prod)){sc+=40;why.push('主力品項契合')}else if(s.prod.some(p=>p.includes(prod.slice(0,2)))){sc+=24}else{sc+=12}
+      if(s.mk.includes('全球')||s.mk.includes(region)){sc+=30;why.push(region+'通路覆蓋')}else{sc+=12}
+      if(cert){if(s.cert.some(x=>x.includes(cert))){sc+=20;why.push(cert+'認證')}else{sc+=6}}else{sc+=(s.cert.some(x=>/HACCP|EU/.test(x))?18:12)}
+      sc+=Math.round(STSCORE[co.st]/10);
+      return {s,sc:Math.min(99,sc),why};
+    }).sort((a,b)=>b.sc-a.sc).slice(0,5);
+    html=`<div class="note" style="margin-bottom:14px">為<b>海外買家</b>媒合 ${prod} → ${co.f}${co.n} 的供應商（${co.stl}）。</div>`+
+      scored.map(m=>`<div class="card match-card"><div class="ring" style="background:${ringColor(m.sc)}">${m.sc}<small style="font-size:9px">%</small></div>
+        <div class="info"><h4>${m.s.n}</h4>
+        <div>${m.s.cert.map(c=>`<span class="mini-badge">${c}</span>`).join('')}</div>
+        <div class="why">📍 ${m.s.hq}　｜　${m.why.join('・')||'基本契合'}　｜　品項：${m.s.prod.slice(0,4).join('、')}</div></div></div>`).join('');
+  } else {
+    const scored=COUNTRIES.map(c=>{
+      const aff=affinity(prod,c.id),sc=Math.min(99,Math.round(aff*0.6+STSCORE[c.st]*0.4));
+      let why=[];if(c.st==='open')why.push('市場開放');if(c.st==='stop')why.push('⚠ 目前受限');if(aff>=80)why.push('需求強勁');
+      return {c,sc,why};
+    }).sort((a,b)=>b.sc-a.sc).slice(0,6);
+    html=`<div class="note" style="margin-bottom:14px">為<b>日本供應商</b>評分 ${prod} 的市場機會排序（全亞洲）。</div>`+
+      scored.map(m=>`<div class="card match-card"><div class="ring" style="background:${ringColor(m.sc)}">${m.sc}<small style="font-size:9px">%</small></div>
+        <div class="info"><h4>${m.c.f} ${m.c.n}　<span class="badge ${m.c.st==='open'?'b-green':m.c.st==='cond'?'b-gold':'b-red'}">${m.c.stl}</span></h4>
+        <div class="why">${m.c.status[1].slice(0,70)}…　${m.why.length?'｜ '+m.why.join('・'):''}</div></div></div>`).join('');
+  }
+  box.innerHTML=html;
+  bumpLearn('match');
+}
+
+/* ====================== TOOLS: subtabs ====================== */
+document.getElementById('tool-subtabs').addEventListener('click',e=>{if(!e.target.dataset.t)return;
+  document.querySelectorAll('#tool-subtabs button').forEach(b=>b.classList.toggle('on',b===e.target));
+  ['check','cost','doc'].forEach(t=>document.getElementById('tool-'+t).style.display=(t===e.target.dataset.t?'block':'none'));});
+
+function runCheck(){
+  const prod=document.getElementById('c-prod').value,mk=document.getElementById('c-market').value,
+    co=COUNTRIES.find(c=>c.id===mk);
+  const sups=SUP.filter(s=>s.prod.includes(prod)),hasEU=sups.some(s=>s.cert.includes('EU')),hasHACCP=sups.some(s=>s.cert.some(x=>x.includes('HACCP')));
+  const items=co.req.map(r=>({t:r[0],ok:Math.random()>0}));
+  // deterministic readiness logic
+  const checks=[
+   {t:co.req[0]?co.req[0][0]:'衛生證明書',ok:true},
+   {t:'放射性物質檢驗證明',ok:co.id!=='cn'},
+   {t:'產地證明書',ok:true},
+   {t:'HACCP / 施設認定',ok:hasHACCP},
+   {t:co.id==='cn'?'中國設施再登錄(GACC)':co.id==='kr'?'漁獲證明書(秋刀魚等)':'目的國輸入報驗',ok:co.st==='open'}
+  ];
+  const done=checks.filter(c=>c.ok).length,score=Math.round(done/checks.length*100);
+  const col=score>=80?'var(--good)':score>=50?'var(--warn)':'var(--bad)';
+  document.getElementById('check-out').innerHTML=
+   `<div class="gauge"><div class="num" style="color:${col}">${score}%</div><div style="color:var(--muted);font-size:13px">出口就緒度　·　${co.f}${co.n}（${co.stl}）</div></div>
+    <ul class="checklist">${checks.map(c=>`<li><span class="ck ${c.ok?'ok':'req'}">${c.ok?'✓':'!'}</span><div><b>${c.t}</b><div style="font-size:12px;color:var(--muted)">${c.ok?'已具備 / 可申辦':'需補件 — 建議優先處理'}</div></div></li>`).join('')}</ul>
+    ${co.st!=='open'?`<div class="stat ${co.st}" style="margin-top:14px">${co.status[1]}</div>`:''}`;
+  bumpLearn('check');
+}
+
+function runCost(){
+  const fob=+document.getElementById('x-fob').value,qty=+document.getElementById('x-qty').value,
+    fr=+document.getElementById('x-freight').value,ins=+document.getElementById('x-ins').value/100,
+    tar=+document.getElementById('x-tariff').value/100,mar=+document.getElementById('x-margin').value/100;
+  const fobTotal=fob*qty,freightTotal=fr*qty,insTotal=(fobTotal+freightTotal)*ins,
+    cif=fobTotal+freightTotal+insTotal,duty=cif*tar,landed=cif+duty,
+    unitLanded=landed/qty,sell=landed/(1-mar),unitSell=sell/qty;
+  const f=n=>'¥'+Math.round(n).toLocaleString();
+  document.getElementById('cost-out').innerHTML=
+   `<h3 style="margin-top:0">到岸成本試算（${qty.toLocaleString()} kg）</h3>
+    <div class="calc-row"><span>FOB 貨值</span><span>${f(fobTotal)}</span></div>
+    <div class="calc-row"><span>＋ 國際運費</span><span>${f(freightTotal)}</span></div>
+    <div class="calc-row"><span>＋ 保險</span><span>${f(insTotal)}</span></div>
+    <div class="calc-row"><span>＝ CIF 貨值</span><span>${f(cif)}</span></div>
+    <div class="calc-row"><span>＋ 進口關稅</span><span>${f(duty)}</span></div>
+    <div class="calc-row total"><span>到岸總成本</span><span>${f(landed)}</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
+     <div class="kpi"><div class="v">${f(unitLanded)}</div><div class="l">到岸單價 / kg</div></div>
+     <div class="kpi"><div class="v" style="color:var(--good)">${f(unitSell)}</div><div class="l">建議售價 / kg（毛利 ${(mar*100).toFixed(0)}%）</div></div>
+    </div>
+    <div class="note">關稅率依各國 FTA/品項而異，實際請查目的國稅則。匯率波動建議於市場觀察記錄追蹤。</div>`;
+  bumpLearn('cost');
+}
+
+function runDoc(){
+  const type=document.getElementById('d-type').value,seller=document.getElementById('d-seller').value,
+    buyer=document.getElementById('d-buyer').value,prod=document.getElementById('d-prod').value,
+    mk=document.getElementById('d-market').value,qty=document.getElementById('d-qty').value,
+    co=COUNTRIES.find(c=>c.id===mk),today=new Date().toISOString().slice(0,10);
+  let out='';
+  if(type==='checklist'){
+    out=`【出口文件檢查清單】${co.f}${co.n}　${prod}\n產生日期：${today}\n────────────────────\n`+
+      co.req.map((r,i)=>`☐ ${i+1}. ${r[0]}${r[1]?'（'+r[1]+'）':''}`).join('\n')+
+      `\n☐ ${co.req.length+1}. 商業發票 Commercial Invoice\n☐ ${co.req.length+2}. 裝箱單 Packing List\n☐ ${co.req.length+3}. 提單 B/L 或空運提單 AWB\n────────────────────\n主管：農林水產物・食品輸出本部\n放射性/產地證明：各地方農政局申請\n${co.st!=='open'?'※ 注意：'+co.stl+' — '+co.status[1]:''}`;
+  } else if(type==='invoice'){
+    out=`COMMERCIAL INVOICE\n──────────────────────────\nDate: ${today}\nSeller (Exporter): ${seller}\nBuyer (Importer): ${buyer}\nDestination: ${co.n}\n──────────────────────────\nDescription        Qty(kg)   Unit(JPY)   Amount(JPY)\n${prod.padEnd(16,' ')}  ${qty}      [   ]       [        ]\n──────────────────────────\nIncoterms: CIF ${co.n}\nCountry of Origin: Japan\nPayment: T/T (to be agreed)\nRemarks: Incl. Health Cert / Radioactivity Test / Cert. of Origin as required.\n\n_________________________\nAuthorized Signature`;
+  } else {
+    out=`PACKING LIST\n──────────────────────────\nDate: ${today}\nExporter: ${seller}\nConsignee: ${buyer}\nDestination: ${co.n}\n──────────────────────────\nItem: ${prod}\nNet Weight: ${qty} kg\nCartons: [   ]   Gross Weight: [   ] kg\nStorage: ${prod.includes('鮪')||prod.includes('黑')?'-60°C 超低溫':'冷凍 -18°C 以下'}\nMarks & Nos: [   ]\n──────────────────────────\nHandled per HACCP. Cold-chain maintained throughout.`;
+  }
+  document.getElementById('doc-out').textContent=out;
+  bumpLearn('doc');
+}
+function copyDoc(){const t=document.getElementById('doc-out').textContent;
+  navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>alert('已複製到剪貼簿')).catch(()=>{});}
+
+/* ====================== PIPELINE ====================== */
+const PIPE_KEY='seaexport_pipe_v1';
+const STAGES=['潛在','洽談','備證','物流','成交'];
+function loadPipe(){try{return JSON.parse(localStorage.getItem(PIPE_KEY))||null}catch(e){return null}}
+function savePipe(a){try{localStorage.setItem(PIPE_KEY,JSON.stringify(a))}catch(e){window._pipe=a}}
+function seedPipe(){if(loadPipe())return;savePipe([
+ {id:1,name:'越南 ABC 水產 - 干貝',prod:'干貝',mk:'vn',stage:1},
+ {id:2,name:'台灣 大成 - 黑鮪魚',prod:'黑鮪魚',mk:'tw',stage:2},
+ {id:3,name:'美國 Sysco - 鰤魚',prod:'鰤魚',mk:'us',stage:3},
+ {id:4,name:'香港 City Super - 干貝',prod:'干貝',mk:'hk',stage:0}
+]);}
+function renderPipe(){
+  const a=loadPipe()||[],b=document.getElementById('pipe-board');b.innerHTML='';
+  STAGES.forEach((st,si)=>{
+    const col=document.createElement('div');col.className='col';
+    const ds=a.filter(d=>d.stage===si);
+    col.innerHTML=`<h4>${st}<span class="cnt">${ds.length}</span></h4>`+
+      ds.map(d=>{const co=COUNTRIES.find(c=>c.id===d.mk)||{f:'',n:d.mk};
+        return `<div class="deal"><b>${d.name}</b><div class="sub">${co.f} ${co.n}　·　${d.prod}</div>
+        <div class="mv"><button onclick="moveDeal(${d.id},-1)" ${si===0?'disabled style=opacity:.3':''}>◀</button>
+        <button onclick="moveDeal(${d.id},1)" ${si===4?'disabled style=opacity:.3':''}>▶</button>
+        <button onclick="delDeal(${d.id})">✕</button></div></div>`;}).join('');
+    b.appendChild(col);
+  });
+}
+function addDeal(){
+  const name=document.getElementById('p-name').value.trim();if(!name){alert('請輸入商談名稱');return;}
+  const a=loadPipe()||[];a.push({id:Date.now(),name,prod:document.getElementById('p-prod').value,mk:document.getElementById('p-market').value,stage:0});
+  savePipe(a);document.getElementById('p-name').value='';renderPipe();bumpLearn('deal');
+}
+function moveDeal(id,d){const a=loadPipe()||[];const x=a.find(z=>z.id===id);if(x){x.stage=Math.max(0,Math.min(4,x.stage+d));savePipe(a);renderPipe();if(x.stage===4)bumpLearn('deal');}}
+function delDeal(id){let a=loadPipe()||[];a=a.filter(z=>z.id!==id);savePipe(a);renderPipe();}
+seedPipe();renderPipe();
+
+/* ====================== LEARNING CENTER ====================== */
+const KNOW_KEY='seaexport_know_v1',LEARN_KEY='seaexport_learncnt_v1';
+function loadKnow(){try{return JSON.parse(localStorage.getItem(KNOW_KEY))||null}catch(e){return null}}
+function saveKnow(a){try{localStorage.setItem(KNOW_KEY,JSON.stringify(a))}catch(e){window._know=a}}
+function seedKnow(){if(loadKnow())return;saveKnow([
+ {text:'越南為干貝去殼/再加工樞紐，承接原銷中國需求，2024 對越出口約 13 倍成長。',src:'obs',kw:['干貝','越南','加工']},
+ {text:'中國自 2025/11/19 再度暫停日本水產進口；設施再登錄 697 件僅 3 件通過。',src:'reg',kw:['中國','禁令','暫停']},
+ {text:'美國本土干貝減產，日本生食級干貝需求升高，為最大替代市場。',src:'obs',kw:['干貝','美國']},
+ {text:'鰤王(東町漁協)2001 年取得對 EU 認定，品牌化外銷美/亞/歐高端通路。',src:'deal',kw:['鰤魚','EU','鰤王']}
+]);}
+function loadCnt(){try{return JSON.parse(localStorage.getItem(LEARN_KEY))||{}}catch(e){return{}}}
+function bumpLearn(k){const c=loadCnt();c[k]=(c[k]||0)+1;try{localStorage.setItem(LEARN_KEY,JSON.stringify(c))}catch(e){}renderLearn();}
+function renderLearn(){
+  const know=loadKnow()||[],obs=loadObs().length,deals=(loadPipe()||[]).length,cnt=loadCnt();
+  const interactions=Object.values(cnt).reduce((a,b)=>a+b,0);
+  const ls=document.getElementById('learn-stats');if(ls)ls.innerHTML=
+   `<div class="card lstat"><div class="v">${know.length}</div><div class="l">知識庫事實數</div></div>
+    <div class="card lstat"><div class="v">${obs}</div><div class="l">市場觀察記錄</div></div>
+    <div class="card lstat"><div class="v">${deals}</div><div class="l">商談筆數</div></div>
+    <div class="card lstat"><div class="v">${interactions}</div><div class="l">Agent 互動次數</div></div>`;
+  const kl=document.getElementById('know-list');if(kl)kl.innerHTML=know.map(k=>{
+    const tag={obs:['st-obs','觀察'],deal:['st-deal','商談'],user:['st-user','教學'],reg:['st-reg','法規']}[k.src]||['st-obs','觀察'];
+    return `<div class="know-item"><span class="src-tag ${tag[0]}">${tag[1]}</span><div>${k.text}</div></div>`;}).join('');
+}
+function teach(){
+  const t=document.getElementById('teach-in').value.trim();if(!t){return;}
+  const a=loadKnow()||[];a.unshift({text:t,src:'user',kw:t.split(/[\s,，、]+/).filter(w=>w.length>1)});
+  saveKnow(a);document.getElementById('teach-in').value='';renderLearn();
+  alert('已教給 Agent！之後對話到相關主題時會引用這條情報。');
+}
+seedKnow();renderLearn();
+
+/* ====================== AGENT: route to tools + use learned facts ====================== */
+const _baseAnswer=answer;
+answer=function(q){
+  // tool routing
+  if(/成本|報價|到岸|試算|cif|fob/i.test(q)) return `🧮 我可以幫你試算到岸成本（FOB→CIF→關稅→建議售價）。請到上方「<b>出口工具 → 成本試算</b>」輸入 FOB 單價、數量、運費與關稅率，我會算出到岸單價與建議報價。`;
+  if(/文件|invoice|發票|packing|裝箱|單據/i.test(q)) return `📄 我可以產生出口文件草稿（檢查清單／商業發票／裝箱單）。請到「<b>出口工具 → 文件產生</b>」選擇文件類型與品項市場即可。`;
+  if(/媒合|配對|推薦.*供應商|找買家|找供應商/.test(q)) return `🤝 我可以做雙向智能媒合並評分。請到「<b>智能媒合</b>」分頁，選擇你的角色（買家／供應商）、品項與市場，我會算出匹配分數並排序。`;
+  if(/管線|商談|crm|追蹤.*進度|pipeline/i.test(q)) return `📊 你的商談可在「<b>商談管線</b>」分頁以看板追蹤（潛在→洽談→備證→物流→成交），資料存於本機。`;
+  let r=_baseAnswer(q);
+  // attach learned facts on keyword overlap
+  const know=loadKnow()||[];
+  const hits=know.filter(k=>(k.kw||[]).some(w=>q.includes(w))).slice(0,2);
+  if(hits.length) r+=`\n\n🧠 <b>我學到的相關情報：</b>\n`+hits.map(h=>'• '+h.text).join('\n');
+  return r;
+};
+</script>
+</body>
+</html>
