@@ -634,6 +634,13 @@
     </div>
     <div id="loop-out"><p style="color:var(--muted)">選擇品項與起始市場後執行，下方會逐迭代展示思考、行動、驗證與修正過程。試試「干貝 → 中國」看 Agent 如何偵測暫停並自動改道。</p></div>
   </div>
+
+  <div class="card panel" id="datalearn-card" style="margin-top:18px">
+    <h3>📊 資料驅動學習 ｜ 成交率反推權重</h3>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 12px">不再用固定規則加減權重，而是把「商談管線」的<b>成交 vs 流單</b>當訓練資料，比較各因素在成功與失敗案例的平均表現，反推哪些因素真正預測成交，據此重算媒合權重。每當有商談成交或被標記流單時也會自動重新學習。</p>
+    <button class="btn" onclick="runDataLearn()">用成交資料重算權重</button>
+    <div id="datalearn-out" style="margin-top:14px"></div>
+  </div>
 </section>
 
 <div class="src" id="sources"></div>
@@ -1073,37 +1080,51 @@ function copyDoc(){const t=document.getElementById('doc-out').textContent;
   navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>alert('已複製到剪貼簿')).catch(()=>{});}
 
 /* ====================== PIPELINE ====================== */
-const PIPE_KEY='seaexport_pipe_v1';
+const PIPE_KEY='seaexport_pipe_v2';
 const STAGES=['潛在','洽談','備證','物流','成交'];
 function loadPipe(){try{return JSON.parse(localStorage.getItem(PIPE_KEY))||null}catch(e){return null}}
 function savePipe(a){try{localStorage.setItem(PIPE_KEY,JSON.stringify(a))}catch(e){window._pipe=a}}
 function seedPipe(){if(loadPipe())return;savePipe([
- {id:1,name:'越南 ABC 水產 - 干貝',prod:'干貝',mk:'vn',stage:1},
- {id:2,name:'台灣 大成 - 黑鮪魚',prod:'黑鮪魚',mk:'tw',stage:2},
- {id:3,name:'美國 Sysco - 鰤魚',prod:'鰤魚',mk:'us',stage:3},
- {id:4,name:'香港 City Super - 干貝',prod:'干貝',mk:'hk',stage:0}
+ {id:1,name:'越南 ABC 水產 - 干貝',prod:'干貝',mk:'vn',stage:4,sup:'HOKUREN 北海道漁連',outcome:'won'},
+ {id:2,name:'台灣 大成 - 黑鮪魚',prod:'黑鮪魚',mk:'tw',stage:4,sup:'三崎恵水産 Misaki Megumi',outcome:'won'},
+ {id:3,name:'美國 Sysco - 鰤魚',prod:'鰤魚',mk:'us',stage:4,sup:'東町漁業協同組合（鰤王）',outcome:'won'},
+ {id:4,name:'中國 大連 - 干貝',prod:'干貝',mk:'cn',stage:2,sup:'HOKUREN 北海道漁連',outcome:'lost'},
+ {id:5,name:'印尼 Pasar - 秋刀魚',prod:'秋刀魚',mk:'id',stage:1,sup:'JF Zengyoren 全国漁業協同組合連合会',outcome:'lost'},
+ {id:6,name:'香港 City Super - 干貝',prod:'干貝',mk:'hk',stage:0,sup:'HOKUREN 北海道漁連',outcome:'open'}
 ]);}
 function renderPipe(){
   const a=loadPipe()||[],b=document.getElementById('pipe-board');b.innerHTML='';
   STAGES.forEach((st,si)=>{
     const col=document.createElement('div');col.className='col';
-    const ds=a.filter(d=>d.stage===si);
+    const ds=a.filter(d=>d.stage===si&&d.outcome!=='lost');
     col.innerHTML=`<h4>${st}<span class="cnt">${ds.length}</span></h4>`+
       ds.map(d=>{const co=COUNTRIES.find(c=>c.id===d.mk)||{f:'',n:d.mk};
-        return `<div class="deal"><b>${d.name}</b><div class="sub">${co.f} ${co.n}　·　${d.prod}</div>
+        const tag=d.outcome==='won'?' <span class="tag-s b-green">成交</span>':'';
+        return `<div class="deal"><b>${d.name}${tag}</b><div class="sub">${co.f} ${co.n}　·　${d.prod}${d.sup?'　·　'+d.sup.split(' ')[0]:''}</div>
         <div class="mv"><button onclick="moveDeal(${d.id},-1)" ${si===0?'disabled style=opacity:.3':''}>◀</button>
         <button onclick="moveDeal(${d.id},1)" ${si===4?'disabled style=opacity:.3':''}>▶</button>
-        <button onclick="delDeal(${d.id})">✕</button></div></div>`;}).join('');
+        <button onclick="markLost(${d.id})" title="標記流單">✗</button>
+        <button onclick="delDeal(${d.id})">🗑</button></div></div>`;}).join('');
     b.appendChild(col);
   });
+  const lost=a.filter(d=>d.outcome==='lost').length;
+  if(lost){const note=document.createElement('div');note.className='note';note.style.gridColumn='1/-1';
+    note.innerHTML=`🗂️ 另有 <b>${lost}</b> 筆流單案例（已用於資料驅動學習的負樣本）。`;b.appendChild(note);}
 }
 function addDeal(){
   const name=document.getElementById('p-name').value.trim();if(!name){alert('請輸入商談名稱');return;}
-  const a=loadPipe()||[];a.push({id:Date.now(),name,prod:document.getElementById('p-prod').value,mk:document.getElementById('p-market').value,stage:0});
+  const prod=document.getElementById('p-prod').value,mk=document.getElementById('p-market').value;
+  const best=(typeof bestSupplier==='function')?bestSupplier(prod,mk):null;
+  const a=loadPipe()||[];a.push({id:Date.now(),name,prod,mk,stage:0,sup:best?best.s.n:'',outcome:'open'});
   savePipe(a);document.getElementById('p-name').value='';renderPipe();bumpLearn('deal');
 }
-function moveDeal(id,d){const a=loadPipe()||[];const x=a.find(z=>z.id===id);if(x){x.stage=Math.max(0,Math.min(4,x.stage+d));savePipe(a);renderPipe();if(x.stage===4)bumpLearn('deal');}}
+function moveDeal(id,d){const a=loadPipe()||[];const x=a.find(z=>z.id===id);if(x){x.stage=Math.max(0,Math.min(4,x.stage+d));
+  if(x.stage===4){x.outcome='won';bumpLearn('deal');autoLearn();}else if(x.outcome!=='lost'){x.outcome='open';}
+  savePipe(a);renderPipe();}}
+function markLost(id){const a=loadPipe()||[];const x=a.find(z=>z.id===id);if(x){x.outcome='lost';savePipe(a);renderPipe();autoLearn();}}
 function delDeal(id){let a=loadPipe()||[];a=a.filter(z=>z.id!==id);savePipe(a);renderPipe();}
+function autoLearn(){const r=(typeof learnWeightsFromDeals==='function')?learnWeightsFromDeals():null;
+  if(r&&r.ok&&typeof renderLearn==='function')renderLearn();if(typeof renderDataLearn==='function')renderDataLearn(r);}
 seedPipe();renderPipe();
 
 /* ====================== LEARNING CENTER ====================== */
@@ -1200,6 +1221,39 @@ function adjustWeights(key){
   let s=WEIGHTS.prod+WEIGHTS.market+WEIGHTS.cert+WEIGHTS.status;WEIGHTS[key]+=100-s;
   saveWeights(WEIGHTS);return {before,after:{...WEIGHTS},key};
 }
+/* ---- 資料驅動學習：以成交/流單反推權重 ---- */
+function dealFeatures(d){
+  const co=COUNTRIES.find(c=>c.id===d.mk)||{st:'cond'},sup=SUP.find(s=>s.n===d.sup),region=REGION_OF[d.mk]||'亞洲';
+  return {
+    prod: sup?(sup.prod.includes(d.prod)?1:(sup.prod.some(p=>p.includes((d.prod||'').slice(0,2)))?0.6:0.3)):0.5,
+    market: sup?((sup.mk.includes('全球')||sup.mk.includes(region))?1:0.4):0.5,
+    cert: sup?(sup.cert.some(x=>/HACCP|EU/.test(x))?1:0.5):0.5,
+    status: STSCORE[co.st]/100
+  };
+}
+function learnWeightsFromDeals(){
+  const deals=(loadPipe()||[]).filter(d=>d.outcome==='won'||d.outcome==='lost');
+  const won=deals.filter(d=>d.outcome==='won'),lost=deals.filter(d=>d.outcome==='lost');
+  if(won.length<2||lost.length<2)return {ok:false,reason:`資料不足（需至少 2 筆成交與 2 筆流單；目前成交 ${won.length}、流單 ${lost.length}）`,won:won.length,lost:lost.length};
+  const keys=['prod','market','cert','status'],mean=(arr,k)=>arr.reduce((a,d)=>a+dealFeatures(d)[k],0)/arr.length;
+  const before={...WEIGHTS},raw={},floor=0.05;let scores={},sum=0;
+  keys.forEach(k=>{const wm=mean(won,k),lm=mean(lost,k);raw[k]={wm,lm,diff:wm-lm};const s=Math.max(wm-lm,0)+floor;scores[k]=s;sum+=s;});
+  const after={};keys.forEach(k=>after[k]=Math.max(5,Math.round(scores[k]/sum*100)));
+  let t=after.prod+after.market+after.cert+after.status;after.prod+=100-t;
+  WEIGHTS={...after};saveWeights(WEIGHTS);
+  return {ok:true,before,after,raw,won:won.length,lost:lost.length};
+}
+function renderDataLearn(r){
+  const out=document.getElementById('datalearn-out');if(!out)return;
+  if(!r||!r.ok){out.innerHTML=`<div class="note">${r?r.reason:'尚無足夠資料'}　可在「商談管線」把商談推進到『成交』或按 ✗ 標記『流單』來累積訓練資料。</div>`;return;}
+  const nm={prod:'品項契合',market:'市場覆蓋',cert:'認證',status:'市場現況'};
+  out.innerHTML=`<div class="loop-summary ok">✅ 已用 <b>${r.won}</b> 筆成交 ＋ <b>${r.lost}</b> 筆流單反推權重</div>
+   <table><thead><tr><th>因素</th><th>成交平均</th><th>流單平均</th><th>判別力（差）</th><th>新權重</th></tr></thead><tbody>
+   ${['prod','market','cert','status'].map(k=>{const x=r.raw[k],b=r.before[k],a=r.after[k];return `<tr><td>${nm[k]}</td><td>${x.wm.toFixed(2)}</td><td>${x.lm.toFixed(2)}</td><td style="color:${x.diff>0?'var(--good)':'var(--muted)'};font-weight:700">${x.diff>0?'+':''}${x.diff.toFixed(2)}</td><td><b>${a}</b> <span style="color:var(--muted)">(${b}→${a})</span></td></tr>`}).join('')}
+   </tbody></table>
+   <div class="note" style="margin-top:10px">判別力＝該因素在「成交」案例的平均值減去「流單」案例的平均值；越高代表越能區分成敗，權重就越高。新權重已存本機，立即套用到「智能媒合」與「Loop 引擎」。</div>`;
+}
+function runDataLearn(){renderDataLearn(learnWeightsFromDeals());bumpLearn('learn');}
 const GOAL_READY=80,GOAL_MATCH=75,MAX_ITER=5;
 function runLoop(){
   const prod=document.getElementById('lp-prod').value;
@@ -1243,7 +1297,10 @@ function runLoop(){
     }
   }
   let wDelta=null;
-  if(switched)wDelta=adjustWeights('status');
+  const learned=learnWeightsFromDeals();
+  if(learned.ok){wDelta={before:learned.before,after:learned.after,dataDriven:true,won:learned.won,lost:learned.lost};}
+  else if(switched){wDelta=adjustWeights('status');}
+  if(typeof renderDataLearn==='function')renderDataLearn(learned);
   const fco=COUNTRIES.find(c=>c.id===mk),last=log[log.length-1];
   if(success)addKnowledge(`Loop 達標：${prod} → ${fco.n}（媒合 ${last.best.sc}・就緒 ${last.obs.readiness}%）`,'deal',[prod,fco.n]);
   renderLoop(log,success,prod,mk,wDelta,iter);
@@ -1264,14 +1321,17 @@ function renderLoop(log,success,prod,finalMk,wDelta,iters){
   });
   if(wDelta){
     const nm={prod:'品項契合',market:'市場覆蓋',cert:'認證',status:'市場現況'};
-    html+=`<div class="card panel" style="margin-top:14px"><h3>🧠 自我修正：媒合權重已更新</h3>
-     <p style="font-size:13px;color:var(--muted)">偵測到「市場狀態」是本次失敗主因，Agent 自動<b>提高「市場現況」權重</b>，讓日後「智能媒合」更避開受限市場。</p>
+    const head=wDelta.dataDriven
+      ? `<h3>🧠 資料驅動自我學習：權重已用成交資料重算</h3><p style="font-size:13px;color:var(--muted)">依商談管線 <b>${wDelta.won}</b> 筆成交／<b>${wDelta.lost}</b> 筆流單反推——真正預測成交的因素獲得更高權重（詳見下方「資料驅動學習」表）。</p>`
+      : `<h3>🧠 自我修正：媒合權重已更新</h3><p style="font-size:13px;color:var(--muted)">偵測到「市場狀態」是本次失敗主因，Agent 自動<b>提高「市場現況」權重</b>，讓日後「智能媒合」更避開受限市場。</p>`;
+    html+=`<div class="card panel" style="margin-top:14px">${head}
      ${['prod','market','cert','status'].map(k=>{const b=wDelta.before[k],a=wDelta.after[k],d=a-b;return `<div class="cap-row"><span class="nm">${nm[k]}</span><span class="track"><span class="fill" style="width:${a*1.6}%"></span></span><span class="pct">${b}→${a}${d?` (${d>0?'+':''}${d})`:''}</span></div>`}).join('')}</div>`;
   }
   html+=`<div class="note" style="margin-top:12px">結果已沉澱進「學習中心」知識庫；媒合權重存於本機，將實際影響「智能媒合」的推薦排序。這就是 Loop Engineering：可控、可驗證、可累積。</div>`;
   out.innerHTML=html;
 }
 fillProd('lp-prod');fillMarket('lp-market');
+(function(){const o=document.getElementById('datalearn-out');if(o)o.innerHTML='<div class="note">點上方按鈕，即以目前「商談管線」的成交／流單資料反推並套用權重；每次商談成交或標記流單時也會自動重學。</div>';})();
 </script>
 </body>
 </html>
